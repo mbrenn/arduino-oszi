@@ -97,6 +97,12 @@ namespace Oszillator
         {
             this.Dispatcher.Invoke(() =>
             {
+                if (this.acquisition == null)
+                {
+                    // We are currently closing the window (or have closed it)
+                    return ;
+                }
+
                 for (var n = 0; n < sample.SampleCount; n++)
                 {
                     this.textBoxes[n].Text = sample.Voltages[n].ToString("n3") + " V";
@@ -105,6 +111,13 @@ namespace Oszillator
                 for (var n = 0; n < sample.SampleCount; n++)
                 {
                     this.Oszilloskop.AddValue(sample.SampleTime, sample.Voltages[n], n);
+                }
+
+                var totalSeconds = (DateTime.Now - this.acquisition.SampleStartDate).TotalSeconds;
+                if (totalSeconds > 1)
+                {
+                    var sps = this.acquisition.TotalSampleCount / totalSeconds;
+                    this.sps.Text = sps.ToString("n1");
                 }
             });
         }
