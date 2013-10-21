@@ -41,7 +41,7 @@ namespace Oszillator.Logic
 
             sample.Voltages[0] = Math.Sin(timeDone * 2) + 2;
             sample.SampleCount = 0;
-            sample.SampleTime = DateTime.Now.Ticks;
+            sample.SampleTime = DateTime.Now;
             return sample;
         }
     }

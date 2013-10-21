@@ -49,7 +49,7 @@ namespace Oszillator.Logic
                 var sample = new Sample(1);
                 sample.Voltages[0] = value;
                 sample.SampleCount = 0;
-                sample.SampleTime = 0;
+                sample.SampleTime = DateTime.Now;
                 return sample;
             }
 

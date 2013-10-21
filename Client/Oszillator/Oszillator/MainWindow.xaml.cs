@@ -29,37 +29,40 @@ namespace Oszillator
             InitializeComponent();
         }
 
+        private void Window_Initialized(object sender, EventArgs e)
+        {
+        }
+
+        /// <summary>
+        /// Starts the oszilloscope with Serial connection
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Start_Click(object sender, RoutedEventArgs e)
         {
+            this.Oszilloskop.Start();
             this.acquisition = new DataAcquisition(new OszillatorConnection(3));
             this.acquisition.Start();
-            this.acquisition.SampleAction = LoopOszi;
+            this.acquisition.SampleAction = OnSample;
+        }
+
+        /// <summary>
+        /// Starts the oscilloscope with Dummy connection
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DummyStart_Click(object sender, RoutedEventArgs e)
+        {
+            this.Oszilloskop.Start();
+            this.acquisition = new DataAcquisition(new DummyConnection());
+            this.acquisition.Start();
+            this.acquisition.SampleAction = OnSample;
         }
 
         private void Stop_Click(object sender, RoutedEventArgs e)
         {
             this.acquisition.Stop();
             this.acquisition = null;
-        }
-
-        private void Window_Initialized(object sender, EventArgs e)
-        {
-        }
-
-        private void LoopOszi(Sample sample)
-        {
-            this.Dispatcher.Invoke(() =>
-            {
-                this.Voltage.Text = sample.Voltages[0].ToString();
-                this.Oszilloskop.AddValue(sample.Voltages[0]);
-            });
-        }
-
-        private void Dummy_Click(object sender, RoutedEventArgs e)
-        {
-            this.acquisition = new DataAcquisition(new DummyConnection());
-            this.acquisition.Start();
-            this.acquisition.SampleAction = LoopOszi;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -69,6 +72,15 @@ namespace Oszillator
                 this.acquisition.Stop();
                 this.acquisition = null;
             }
+        }
+
+        private void OnSample(Sample sample)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                this.Voltage.Text = sample.Voltages[0].ToString();
+                this.Oszilloskop.AddValue(sample.SampleTime, sample.Voltages[0]);
+            });
         }
     }
 }

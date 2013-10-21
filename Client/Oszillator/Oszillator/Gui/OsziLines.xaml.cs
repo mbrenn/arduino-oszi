@@ -36,6 +36,16 @@ namespace Oszillator.Gui
         private double widthSamplePoints;
 
         /// <summary>
+        /// Defines the number of pixels being used per second
+        /// </summary>
+        private double pixelsPerSecond = 100;
+
+        /// <summary>
+        /// Stores the time value of the left side of the oszilloscope
+        /// </summary>
+        private DateTime timeLeft = DateTime.MinValue;
+
+        /// <summary>
         /// Stores the y-Position on screen
         /// </summary>
         private double lastPositionOnScreen = 0.0;
@@ -47,6 +57,11 @@ namespace Oszillator.Gui
         public OsziLines()
         {
             InitializeComponent();
+        }
+
+        public void Start()
+        {
+            this.timeLeft = DateTime.Now;
         }
 
         private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -81,21 +96,49 @@ namespace Oszillator.Gui
             this.widthSamplePoints = e.NewSize.Width;
         }
 
-        public void AddValue(double value, int channel = 0)
+        public void AddValue(DateTime time, double value, int channel = 0)
         {
+            if ( this.timeLeft == DateTime.MinValue )
+            {
+                throw new InvalidOperationException("Oszilloscope has not been started");
+            }
+
+            // Calculates the Y-Position of the point by value
             var a = this.controlHeight / (this.valueTop - this.valueBottom);
             var b = -this.controlHeight * this.valueBottom / (this.valueTop - this.valueBottom);
             var positionHeight = this.controlHeight - (a * value + b);
-            this.lines[channel][this.currentPosition].Y1 = this.lastPositionOnScreen;
-            this.lines[channel][this.currentPosition].Y2 = positionHeight;
 
-            this.lastPositionOnScreen = positionHeight;
+            // Calculates the X-Position of the point by time
+            var secondsFromLeft = (DateTime.Now - timeLeft).TotalSeconds;
+            var xValue = secondsFromLeft * this.pixelsPerSecond;
 
-            this.currentPosition++;
-            if (this.currentPosition >= this.widthSamplePoints)
+            while (xValue > this.widthSamplePoints)
             {
-                this.currentPosition = 0;
+                xValue -= this.widthSamplePoints;
             }
+
+            // Now render all the points between last point and this point
+            var xValueAsInteger = Convert.ToInt32(Math.Floor(xValue));
+
+            // Paint X: this.currentPosition to xValueAsInteger
+            // Paint Y: this.lastPositionOnScreen to positionHeight
+            while (this.currentPosition != xValueAsInteger)
+            {
+                this.lines[channel][this.currentPosition].Y1 = this.lastPositionOnScreen;
+                this.lines[channel][this.currentPosition].Y2 = positionHeight;
+
+                this.lastPositionOnScreen = positionHeight;
+
+                this.currentPosition++;
+                if (this.currentPosition >= this.widthSamplePoints)
+                {
+                    this.currentPosition = 0;
+                }
+            }
+
+            // Done
+            // Stores the last position, being used to transfer
+            this.lastPositionOnScreen = positionHeight;
         }
     }
 }
