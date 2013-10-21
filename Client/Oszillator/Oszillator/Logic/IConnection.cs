@@ -8,7 +8,7 @@ namespace Oszillator.Logic
 {
     public interface IConnection
     {
-        void Setup();
+        void Setup(int channelCount);
         void Start();
         void Stop();
         Sample Read();

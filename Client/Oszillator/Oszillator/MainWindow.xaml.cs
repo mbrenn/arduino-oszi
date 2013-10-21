@@ -40,8 +40,12 @@ namespace Oszillator
         /// <param name="e"></param>
         private void Start_Click(object sender, RoutedEventArgs e)
         {
+            var channelCount = 1;
+
+            this.Oszilloskop.SetChannelCount(1);
             this.Oszilloskop.Start();
-            this.acquisition = new DataAcquisition(new OszillatorConnection(3));
+
+            this.acquisition = new DataAcquisition(new OszillatorConnection(3), channelCount);
             this.acquisition.Start();
             this.acquisition.SampleAction = OnSample;
         }
@@ -53,8 +57,12 @@ namespace Oszillator
         /// <param name="e"></param>
         private void DummyStart_Click(object sender, RoutedEventArgs e)
         {
+            var channelCount = 2;
+
+            this.Oszilloskop.SetChannelCount(channelCount);
             this.Oszilloskop.Start();
-            this.acquisition = new DataAcquisition(new DummyConnection());
+            
+            this.acquisition = new DataAcquisition(new DummyConnection(), channelCount);
             this.acquisition.Start();
             this.acquisition.SampleAction = OnSample;
         }
@@ -79,7 +87,11 @@ namespace Oszillator
             this.Dispatcher.Invoke(() =>
             {
                 this.Voltage.Text = sample.Voltages[0].ToString();
-                this.Oszilloskop.AddValue(sample.SampleTime, sample.Voltages[0]);
+
+                for (var n = 0; n < sample.SampleCount; n++)
+                {
+                    this.Oszilloskop.AddValue(sample.SampleTime, sample.Voltages[n], n);
+                }
             });
         }
     }

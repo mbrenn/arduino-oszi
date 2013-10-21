@@ -9,6 +9,8 @@ namespace Oszillator.Logic
 {
     public class OszillatorConnection : IConnection
     {
+        private int channelCount = 0;
+
         public OszillatorConnection(int comPort)
         {
             this.ComPort = comPort;
@@ -18,8 +20,10 @@ namespace Oszillator.Logic
 
         public SerialPort SerialPort { get; set; }
 
-        public void Setup()
+        public void Setup(int channelCount)
         {
+            this.channelCount = channelCount;
+
             this.SerialPort = new SerialPort();
             this.SerialPort.PortName = "COM" + this.ComPort.ToString();
             this.SerialPort.BaudRate = 9600;

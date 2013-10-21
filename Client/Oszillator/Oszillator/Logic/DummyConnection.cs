@@ -9,12 +9,14 @@ namespace Oszillator.Logic
 {
     public class DummyConnection : IConnection
     {
+        private int channelCount = 0;
         private DateTime startTime;
 
         private Random random = new Random();
 
-        public void Setup()
+        public void Setup(int channelCount)
         {
+            this.channelCount = channelCount;
         }
 
         public void Start()
@@ -28,19 +30,18 @@ namespace Oszillator.Logic
 
         public Sample Read()
         {
-            // Create Jitter
-            if (random.Next(100) > 95)
-            {
-                Thread.Sleep(300);
-            }
-
             Thread.Sleep(10);
 
-            var sample = new Sample(1);
+            var sample = new Sample(2);
             var timeDone = (DateTime.Now- startTime).TotalSeconds;
 
             sample.Voltages[0] = Math.Sin(timeDone * 2) + 2;
-            sample.SampleCount = 0;
+            if (this.channelCount > 1)
+            {
+                sample.Voltages[1] = Math.Cos(timeDone * 3) + 1.5;
+            }
+
+            sample.SampleCount = 2;
             sample.SampleTime = DateTime.Now;
             return sample;
         }
