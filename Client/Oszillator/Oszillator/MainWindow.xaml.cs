@@ -24,6 +24,8 @@ namespace Oszillator
     {
         private DataAcquisition acquisition;
 
+        private TextBox[] textBoxes;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -31,6 +33,15 @@ namespace Oszillator
 
         private void Window_Initialized(object sender, EventArgs e)
         {
+            this.textBoxes = new TextBox[] 
+            {
+                this.Voltage1,
+                this.Voltage2,
+                this.Voltage3,
+                this.Voltage4,
+                this.Voltage5,
+                this.Voltage6
+            };
         }
 
         /// <summary>
@@ -86,7 +97,10 @@ namespace Oszillator
         {
             this.Dispatcher.Invoke(() =>
             {
-                this.Voltage.Text = sample.Voltages[0].ToString();
+                for (var n = 0; n < sample.SampleCount; n++)
+                {
+                    this.textBoxes[n].Text = sample.Voltages[n].ToString("n3") + " V";
+                }
 
                 for (var n = 0; n < sample.SampleCount; n++)
                 {

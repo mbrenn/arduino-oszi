@@ -20,10 +20,32 @@
         <Button Content="Dummy-Start" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="DummyStart_Click" Grid.Column="2"/>
 
         <Gui:OsziLines BorderBrush="Blue" BorderThickness="1" 
-                       x:Name="Oszilloskop" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3"/>
-        <TextBox x:Name="Voltage" TextWrapping="Wrap" Text="TextBox" Grid.ColumnSpan="3" Grid.Column="0" Grid.Row="2"/>
-        
-
-
+                       x:Name="Oszilloskop" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2"/>
+        <StackPanel Grid.Row="1" Grid.Column="2">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock>Voltage 1:</TextBlock>
+                <TextBox x:Name="Voltage1" Width="100" TextAlignment="Right" IsReadOnly="true"></TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock>Voltage 2:</TextBlock>
+                <TextBox x:Name="Voltage2" Width="100" TextAlignment="Right" IsReadOnly="true"></TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock>Voltage 3:</TextBlock>
+                <TextBox x:Name="Voltage3" Width="100" TextAlignment="Right" IsReadOnly="true"></TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock>Voltage 4:</TextBlock>
+                <TextBox x:Name="Voltage4" Width="100" TextAlignment="Right" IsReadOnly="true"></TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock>Voltage 5:</TextBlock>
+                <TextBox x:Name="Voltage5" Width="100" TextAlignment="Right" IsReadOnly="true"></TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock>Voltage 6:</TextBlock>
+                <TextBox x:Name="Voltage6" Width="100" TextAlignment="Right" IsReadOnly="true"></TextBox>
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </Window>
