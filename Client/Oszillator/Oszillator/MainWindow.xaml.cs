@@ -22,11 +22,7 @@ namespace Oszillator
     /// </summary>
     public partial class MainWindow : Window
     {
-        private IConnection connection;
-
-        private Thread osziThread;
-
-        private bool running;
+        private DataAcquisition acquisition;
 
         public MainWindow()
         {
@@ -35,67 +31,44 @@ namespace Oszillator
 
         private void Start_Click(object sender, RoutedEventArgs e)
         {
-            this.connection = new OszillatorConnection(3);
-            this.connection.Setup();
-            this.connection.Start();
-            this.StartDisplayThread();
-        }
-
-        /// <summary>
-        /// Starts the display thread to render the current input
-        /// </summary>
-        private void StartDisplayThread()
-        {
-            this.osziThread = new Thread(this.LoopOszi);
-            this.running = true;
-            this.osziThread.Start();
+            this.acquisition = new DataAcquisition(new OszillatorConnection(3));
+            this.acquisition.Start();
+            this.acquisition.SampleAction = LoopOszi;
         }
 
         private void Stop_Click(object sender, RoutedEventArgs e)
         {
-            this.running = false;
-            this.connection.Stop();
+            this.acquisition.Stop();
+            this.acquisition = null;
         }
 
         private void Window_Initialized(object sender, EventArgs e)
         {
         }
 
-        private void LoopOszi(object obj)
+        private void LoopOszi(Sample sample)
         {
-            while (true)
+            this.Dispatcher.Invoke(() =>
             {
-                lock (this)
-                {
-                    if (this.running == false)
-                    {
-                        break;
-                    }
-                }
-
-                var value = this.connection.Read();
-                this.Dispatcher.Invoke(() =>
-                {
-                    this.Voltage.Text = value.ToString();
-                    this.Oszilloskop.AddValue(value);
-                });
-            }
+                this.Voltage.Text = sample.Voltages[0].ToString();
+                this.Oszilloskop.AddValue(sample.Voltages[0]);
+            });
         }
 
         private void Dummy_Click(object sender, RoutedEventArgs e)
         {
-            this.connection = new DummyConnection();
-            this.connection.Setup();
-            this.connection.Start();
-
-            this.StartDisplayThread();
+            this.acquisition = new DataAcquisition(new DummyConnection());
+            this.acquisition.Start();
+            this.acquisition.SampleAction = LoopOszi;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            this.running = false;
-            this.connection.Stop();
-            this.osziThread.Join(1000);
+            if (this.acquisition != null && this.acquisition.IsStarted)
+            {
+                this.acquisition.Stop();
+                this.acquisition = null;
+            }
         }
     }
 }

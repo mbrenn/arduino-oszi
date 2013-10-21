@@ -9,22 +9,40 @@ namespace Oszillator.Logic
 {
     public class DummyConnection : IConnection
     {
+        private DateTime startTime;
+
+        private Random random = new Random();
+
         public void Setup()
         {
         }
 
         public void Start()
         {
+            this.startTime = DateTime.Now;
         }
 
         public void Stop()
         {
         }
 
-        public double Read()
+        public Sample Read()
         {
+            // Create Jitter
+            if (random.Next(100) > 95)
+            {
+                Thread.Sleep(300);
+            }
+
             Thread.Sleep(10);
-            return Math.Sin(((double)(DateTime.Now.Ticks % 10000)) * 0.001);
+
+            var sample = new Sample(1);
+            var timeDone = (DateTime.Now- startTime).TotalSeconds;
+
+            sample.Voltages[0] = Math.Sin(timeDone * 2) + 2;
+            sample.SampleCount = 0;
+            sample.SampleTime = DateTime.Now.Ticks;
+            return sample;
         }
     }
 }

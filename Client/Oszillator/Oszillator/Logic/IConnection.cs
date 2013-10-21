@@ -11,6 +11,6 @@ namespace Oszillator.Logic
         void Setup();
         void Start();
         void Stop();
-        double Read();
+        Sample Read();
     }
 }

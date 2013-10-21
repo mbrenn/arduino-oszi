@@ -39,17 +39,21 @@ namespace Oszillator.Logic
             this.SerialPort.Close();
         }
 
-        public double Read()
+        public Sample Read()
         {
             var line = this.SerialPort.ReadLine();
 
             int value;
             if (int.TryParse(line, out value))
             {
-                return ((double)value) * 5.0 / 1024.0;
+                var sample = new Sample(1);
+                sample.Voltages[0] = value;
+                sample.SampleCount = 0;
+                sample.SampleTime = 0;
+                return sample;
             }
 
-            return -1;
+            return null;
         }
     }
 }
