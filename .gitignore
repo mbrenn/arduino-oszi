@@ -1,0 +1,6 @@
+*.suo
+Debug
+/Embedded/oszi-win32/*.user
+/Embedded/oszi-win32/ipch/
+/Embedded/oszi-win32/*.sdf
+/Embedded/oszi-win32/*.opensdf
