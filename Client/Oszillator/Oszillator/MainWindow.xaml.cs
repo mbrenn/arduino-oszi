@@ -51,9 +51,9 @@ namespace Oszillator
         /// <param name="e"></param>
         private void Start_Click(object sender, RoutedEventArgs e)
         {
-            var channelCount = 1;
+            var channelCount = 2;
 
-            this.Oszilloskop.SetChannelCount(1);
+            this.Oszilloskop.SetChannelCount(channelCount);
             this.Oszilloskop.Start();
 
             this.acquisition = new DataAcquisition(new OszillatorConnection(3), channelCount);
@@ -100,7 +100,7 @@ namespace Oszillator
                 if (this.acquisition == null)
                 {
                     // We are currently closing the window (or have closed it)
-                    return ;
+                    return;
                 }
 
                 for (var n = 0; n < sample.SampleCount; n++)

@@ -68,9 +68,14 @@
     <Compile Include="Gui\OsziLines.xaml.cs">
       <DependentUpon>OsziLines.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Logic\ArduinoProtocol.cs" />
     <Compile Include="Logic\DataAcquisition.cs" />
     <Compile Include="Logic\DummyConnection.cs" />
     <Compile Include="Logic\IConnection.cs" />
+    <Compile Include="Logic\Messages\ErrorSequence.cs" />
+    <Compile Include="Logic\Messages\SampleSequence.cs" />
+    <Compile Include="Logic\Messages\StopSequence.cs" />
+    <Compile Include="Logic\Messages\SyncSequence.cs" />
     <Compile Include="Logic\Sample.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

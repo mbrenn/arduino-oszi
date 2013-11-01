@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Oszillator.Logic.Messages;
+using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
@@ -10,6 +11,8 @@ namespace Oszillator.Logic
     public class OszillatorConnection : IConnection
     {
         private int channelCount = 0;
+
+        private ArduinoProtocol connection;
 
         public OszillatorConnection(int comPort)
         {
@@ -31,30 +34,31 @@ namespace Oszillator.Logic
             this.SerialPort.StopBits = StopBits.One;
             this.SerialPort.DataBits = 8;
             this.SerialPort.Handshake = Handshake.None;
+            this.SerialPort.Open();
+
+            this.connection = new ArduinoProtocol(this.SerialPort);
+            this.connection.SetAnalogChannelCount(channelCount);
         }
 
         public void Start()
         {
-            this.SerialPort.Open();
+            this.connection.SendStartCommand();
         }
 
         public void Stop()
         {
+            this.connection.SendStopCommand();
             this.SerialPort.Close();
         }
 
         public Sample Read()
         {
-            var line = this.SerialPort.ReadLine();
+            var result = this.connection.Pull();
+            var asSample = result as SampleSequence;
 
-            int value;
-            if (int.TryParse(line, out value))
+            if (asSample != null)
             {
-                var sample = new Sample(1);
-                sample.Voltages[0] = value;
-                sample.SampleCount = 0;
-                sample.SampleTime = DateTime.Now;
-                return sample;
+                return asSample.Sample;
             }
 
             return null;

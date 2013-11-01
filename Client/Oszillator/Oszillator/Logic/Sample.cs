@@ -14,6 +14,8 @@ namespace Oszillator.Logic
         public Sample(int sampleCount)
         {
             this.Voltages = new double[sampleCount];
+            this.SampleCount = sampleCount;
+            this.SampleTime = DateTime.Now;
         }
 
         /// <summary>

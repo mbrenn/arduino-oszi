@@ -97,14 +97,17 @@ namespace Oszillator.Logic
 
                 // Do sampling
                 var sample = this.Connection.Read();
-                lock (this)
+                if (sample != null)
                 {
-                    this.TotalSampleCount++;
-                }
+                    lock (this)
+                    {
+                        this.TotalSampleCount++;
+                    }
 
-                if (this.SampleAction != null)
-                {
-                    this.SampleAction(sample);
+                    if (this.SampleAction != null)
+                    {
+                        this.SampleAction(sample);
+                    }
                 }
             }
         }
