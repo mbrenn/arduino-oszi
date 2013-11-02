@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -14,7 +15,7 @@ namespace Oszillator.Logic
     {
         private int channelCount = 0;
 
-        public bool IsStarted
+        public bool IsRunning
         {
             get;
             private set;
@@ -61,7 +62,7 @@ namespace Oszillator.Logic
 
         public void Start()
         {
-            if (this.IsStarted)
+            if (this.IsRunning)
             {
                 throw new InvalidOperationException("Already started");
             }
@@ -71,7 +72,7 @@ namespace Oszillator.Logic
 
             lock (this)
             {
-                this.IsStarted = true;
+                this.IsRunning = true;
             }
 
             this.SampleThread = new Thread(this.SampleLoop);
@@ -85,11 +86,13 @@ namespace Oszillator.Logic
 
         public void SampleLoop()
         {
+            Debug.WriteLine("Starting sample loop");
+
             while (true)
             {
                 lock (this)
                 {
-                    if (!this.IsStarted)
+                    if (!this.IsRunning)
                     {
                         break;
                     }
@@ -110,6 +113,8 @@ namespace Oszillator.Logic
                     }
                 }
             }
+
+            Debug.WriteLine("Stopping sample loop");
         }
 
         /// <summary>
@@ -117,18 +122,22 @@ namespace Oszillator.Logic
         /// </summary>
         public void Stop()
         {
-            if (!this.IsStarted)
+            if (!this.IsRunning)
             {
                 throw new InvalidOperationException("Not Started");
             }
 
+            // Stops the connection
+            this.Connection.Stop();
+
             lock (this)
             {
-                this.IsStarted = false;
+                this.IsRunning = false;
             }
 
             this.SampleThread.Join(1000);
-            this.Connection.Stop();
+
+            this.Connection.Close();
         }
     }
 }

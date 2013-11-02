@@ -28,6 +28,10 @@ namespace Oszillator.Logic
         {
         }
 
+        public void Close()
+        {
+        }
+
         public Sample Read()
         {
             Thread.Sleep(10);

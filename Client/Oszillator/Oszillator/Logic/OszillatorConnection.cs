@@ -34,7 +34,15 @@ namespace Oszillator.Logic
             this.SerialPort.StopBits = StopBits.One;
             this.SerialPort.DataBits = 8;
             this.SerialPort.Handshake = Handshake.None;
-            this.SerialPort.Open();
+
+            try
+            {
+                this.SerialPort.Open();
+            }
+            catch (UnauthorizedAccessException exc)
+            {
+                throw new InvalidOperationException(exc.Message);
+            }
 
             this.connection = new ArduinoProtocol(this.SerialPort);
             this.connection.SetAnalogChannelCount(channelCount);
@@ -48,6 +56,12 @@ namespace Oszillator.Logic
         public void Stop()
         {
             this.connection.SendStopCommand();
+            this.connection.WaitForStop();
+            this.connection.SendStopConfirmationCommand();
+        }
+
+        public void Close()
+        {
             this.SerialPort.Close();
         }
 

@@ -2,7 +2,14 @@ int ledPin = 13;                   // Defines the PIN for the LED
 byte numberAnalogChannels = 1;     // Defines the number of channels to be read
 
 // Stores the state whether the server is currently running
-bool stateServerRun = false;       // true, if data acquisition is running
+enum ServerStates
+{
+  Stop = 1,
+  Stopping = 2,
+  Running = 3
+};
+
+ServerStates stateServerRun = Stop;       // true, if data acquisition is running
 byte inputState = 0;               // 0 for start of sequence, 1 if next symbol is defining the number of analog channels
 
 byte frameCount = 0;               // Number of frames to be sent
@@ -15,6 +22,11 @@ void setup()
   Serial.begin(9600);
   
   Serial.println("Depon.Net Oszillator");
+  
+  inputState = 0;
+  frameCount = 0;
+  stateServerRun = Stop;
+  digitalWrite(ledPin,LOW);
 }
 
 void loop()
@@ -32,42 +44,73 @@ void loopOszi()
     {      
       if (incoming == 'g')
       {
-        stateServerRun = true;
-        sendSyncSequence();
-        digitalWrite(ledPin,HIGH);
+        if(stateServerRun != Stop)
+        {
+          sendErrorSequence(0x06);
+        }
+        else
+        {
+          stateServerRun = Running;
+          sendSyncSequence();
+          digitalWrite(ledPin,HIGH);
+        }
       }
       else if (incoming == 's')
       {
-        stateServerRun = false;
-        sendStopStreamSequence();
-        digitalWrite(ledPin,LOW);
+        if(stateServerRun != Running)
+        {
+          sendErrorSequence(0x07);
+        }
+        else
+        {
+          stateServerRun = Stopping;
+          digitalWrite(ledPin,LOW);
+        }
       }      
+      else if (incoming == 't')
+      {
+        if(stateServerRun != Stopping)
+        {
+          sendErrorSequence(0x05);
+        }
+        else
+        {
+          stateServerRun = Stop;
+        }
+      }
       else if (incoming == 'a')
       {
-        // Waiting for number of channels
-        inputState = 1;
+        if(stateServerRun != Stop)
+        {
+          sendErrorSequence(0x04);
+        }
+        else
+        {
+          // Waiting for number of channels
+          inputState = 1;
+        }
       }
       else
       {
-        sendErrorSequence();
+        sendErrorSequence(0x01);
       }
     }    
     else if (inputState == 1)
     {
       if (incoming >= '1' && incoming <= '6')
       {
-        if(stateServerRun)
+        if(stateServerRun == Stop)
         {
           numberAnalogChannels = incoming - '0';
         }
         else
         {
-          sendErrorSequence();
+          sendErrorSequence(0x02);
         }
       }
       else
       {
-        sendErrorSequence();
+        sendErrorSequence(0x03);
       }
       
       // Reset input state
@@ -75,7 +118,7 @@ void loopOszi()
     }    
   }   
 
-  if(stateServerRun)
+  if(stateServerRun == Running)
   {
     unsigned int channels[6];
     for (int n = 0; n < numberAnalogChannels; n++)
@@ -92,6 +135,11 @@ void loopOszi()
       frameCount = 0;
     }
   }
+  else if (stateServerRun == Stopping)
+  {
+    // Sends out stop sequences until client has confirmed by 't'
+    sendStopStreamSequence();
+  }
 }
 
 
@@ -104,10 +152,10 @@ void sendSyncSequence()
   Serial.write(array, 3);
 }
 
-void sendErrorSequence()
+void sendErrorSequence(byte error)
 {
-  byte array[] = { 0xFF, 0xFF, 0xFE };
-  Serial.write(array, 3);
+  byte array[] = { 0xFF, 0xFF, 0xFE, error };
+  Serial.write(array, 4);
 }
 
 void sendStopStreamSequence()

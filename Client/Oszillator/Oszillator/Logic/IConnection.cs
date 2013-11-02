@@ -11,6 +11,7 @@ namespace Oszillator.Logic
         void Setup(int channelCount);
         void Start();
         void Stop();
+        void Close();
         Sample Read();
     }
 }

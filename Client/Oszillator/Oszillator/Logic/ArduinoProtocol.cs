@@ -1,9 +1,11 @@
 ﻿using Oszillator.Logic.Messages;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Oszillator.Logic
@@ -14,6 +16,11 @@ namespace Oszillator.Logic
     public class ArduinoProtocol
     {
         /// <summary>
+        /// Synchronisationobject for message sending
+        /// </summary>
+        private object messageSync = new object();
+
+        /// <summary>
         /// Stores the number of channels
         /// </summary>
         private int analogChannelCount = 1;
@@ -21,7 +28,7 @@ namespace Oszillator.Logic
         /// <summary>
         /// Defines the client state
         /// </summary>
-        private bool isRunning = false;
+        private volatile bool isRunning = false;
 
         /// <summary>
         /// Stores the port
@@ -29,6 +36,11 @@ namespace Oszillator.Logic
         private SerialPort port;
 
         private List<byte> buffer = new List<byte>();
+
+        /// <summary>
+        /// This event is triggered, when the stop message had been received
+        /// </summary>
+        private AutoResetEvent stopMessageReceived = new AutoResetEvent(false);
 
         private int[] messageLengths =
         {
@@ -51,6 +63,8 @@ namespace Oszillator.Logic
         public ArduinoProtocol(SerialPort port)
         {
             this.port = port;
+            this.port.ReadTimeout = 200;
+            Debug.WriteLine("Constructing protocol");
         }
 
         public void SetAnalogChannelCount(int channelCount)
@@ -61,7 +75,11 @@ namespace Oszillator.Logic
             }
 
             this.analogChannelCount = channelCount;
-            this.port.Write(new char[] { 'a', channelCount.ToString()[0] }, 0, 2);
+
+            lock (this.messageSync)
+            {
+                this.port.Write(new char[] { 'a', channelCount.ToString()[0] }, 0, 2);
+            }
         }
 
         public void SendStartCommand()
@@ -71,8 +89,13 @@ namespace Oszillator.Logic
                 throw new InvalidOperationException("Client is already running");
             }
 
-            this.port.Write(new char[] { 'g', analogChannelCount.ToString()[0] }, 0, 1);
+            lock (this.messageSync)
+            {
+                this.port.Write(new char[] { 'g', analogChannelCount.ToString()[0] }, 0, 1);
+            }
+
             this.isRunning = true;
+            Debug.WriteLine("Go has been sent");
         }
 
         public void SendStopCommand()
@@ -82,9 +105,28 @@ namespace Oszillator.Logic
                 throw new InvalidOperationException("Client is not running");
             }
 
-            this.port.Write(new char[] { 's', analogChannelCount.ToString()[0] }, 0, 1);
+            lock (this.messageSync)
+            {
+                this.port.Write(new char[] { 's', analogChannelCount.ToString()[0] }, 0, 1);
+            }
 
-            // We have to wait until the server acknowledges the receipt by message
+            // Waiting for stop in pull
+            Debug.WriteLine("Stop has been sent");
+        }
+
+        public void SendStopConfirmationCommand()
+        {
+            if (this.isRunning)
+            {
+                throw new InvalidOperationException("Stop sequence has not yet been received");
+            }
+
+            lock ( this.messageSync)
+            {
+                this.port.Write(new char[] { 't' }, 0, 1);
+            }
+
+            Debug.WriteLine("Stop Confirmation has been sent");
         }
 
         /// <summary>
@@ -95,13 +137,20 @@ namespace Oszillator.Logic
         /// <returns>true, if object is available</returns>
         public object Pull(bool synchron = true)
         {
-            if (this.port.BytesToRead > 0 || synchron)
+            try
             {
-                var value = (byte)this.port.ReadByte();
+                if (this.port.BytesToRead > 0 || synchron)
+                {
+                    var value = (byte)this.port.ReadByte();
 
-                // Add value to internal array
-                this.buffer.Add(value);
-                return this.EvaluateBuffer();
+                    // Add value to internal array
+                    this.buffer.Add(value);
+                    return this.EvaluateBuffer();
+                }
+            }
+            catch (TimeoutException)
+            {
+                // Nothing to to
             }
 
             return null;
@@ -137,12 +186,15 @@ namespace Oszillator.Logic
                 this.buffer[1] == 0xFF &&
                 this.buffer[2] == 0x01)
             {
+                Debug.WriteLine("Stop has been received");
                 this.buffer.Clear();
                 this.isRunning = false;
 
+                this.stopMessageReceived.Set();
+
                 return new StopSequence();
             }
-
+    
             // Check for error
             if (length == 4 &&
                 this.buffer[0] == 0xFF &&
@@ -151,8 +203,8 @@ namespace Oszillator.Logic
             {
                 var code = this.buffer[3];
                 this.buffer.Clear();
-                this.isRunning = false;
 
+                Debug.WriteLine("Error has been received: " + code.ToString());
                 return new ErrorSequence()
                 {
                     ErrorCode = code
@@ -208,7 +260,7 @@ namespace Oszillator.Logic
 
             for (var n = 0; n < this.analogChannelCount; n++)
             {
-                if ( sample.Voltages[n] == 1022)
+                if (sample.Voltages[n] == 1022)
                 {
                     sample.Voltages[n] = 1023;
                 }
@@ -220,6 +272,17 @@ namespace Oszillator.Logic
             {
                 Sample = sample
             };
+        }
+
+        /// <summary>
+        /// Waits until stop message had been received
+        /// </summary>
+        public void WaitForStop()
+        {
+            while (this.isRunning)
+            {
+                this.stopMessageReceived.WaitOne(500);
+            }
         }
     }
 }

@@ -51,14 +51,21 @@ namespace Oszillator
         /// <param name="e"></param>
         private void Start_Click(object sender, RoutedEventArgs e)
         {
-            var channelCount = 2;
+            try
+            {
+                var channelCount = 1;
 
-            this.Oszilloskop.SetChannelCount(channelCount);
-            this.Oszilloskop.Start();
+                this.Oszilloskop.SetChannelCount(channelCount);
+                this.Oszilloskop.Start();
 
-            this.acquisition = new DataAcquisition(new OszillatorConnection(3), channelCount);
-            this.acquisition.Start();
-            this.acquisition.SampleAction = OnSample;
+                this.acquisition = new DataAcquisition(new OszillatorConnection(3), channelCount);
+                this.acquisition.Start();
+                this.acquisition.SampleAction = OnSample;
+            }
+            catch (Exception exc)
+            {
+                MessageBox.Show(exc.Message);
+            }
         }
 
         /// <summary>
@@ -80,13 +87,19 @@ namespace Oszillator
 
         private void Stop_Click(object sender, RoutedEventArgs e)
         {
+            if (this.acquisition == null)
+            {
+                MessageBox.Show(this, "Not yet started");
+                return;
+            }
+
             this.acquisition.Stop();
             this.acquisition = null;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (this.acquisition != null && this.acquisition.IsStarted)
+            if (this.acquisition != null && this.acquisition.IsRunning)
             {
                 this.acquisition.Stop();
                 this.acquisition = null;

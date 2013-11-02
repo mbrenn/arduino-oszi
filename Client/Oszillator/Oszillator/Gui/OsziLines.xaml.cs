@@ -67,8 +67,6 @@ namespace Oszillator.Gui
 
         private double valueBottom = -0.2;
 
-        
-
         /// <summary>
         /// Stores the number of channels
         /// </summary>
