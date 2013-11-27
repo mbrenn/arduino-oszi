@@ -29,7 +29,7 @@ namespace Oszillator.Logic
 
             this.SerialPort = new SerialPort();
             this.SerialPort.PortName = "COM" + this.ComPort.ToString();
-            this.SerialPort.BaudRate = 9600;
+            this.SerialPort.BaudRate = 38400;
             this.SerialPort.Parity = Parity.None;
             this.SerialPort.StopBits = StopBits.One;
             this.SerialPort.DataBits = 8;

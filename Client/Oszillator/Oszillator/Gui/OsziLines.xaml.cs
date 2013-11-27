@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Oszillator.Logic;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -46,7 +47,7 @@ namespace Oszillator.Gui
         /// <summary>
         /// Defines the number of pixels being used per second
         /// </summary>
-        private double pixelsPerSecond = 100;
+        private double pixelsPerSecond = 300;
 
         /// <summary>
         /// Stores the time value of the left side of the oszilloscope
@@ -66,6 +67,8 @@ namespace Oszillator.Gui
         private double valueTop = 5.2;
 
         private double valueBottom = -0.2;
+
+        private List<Sample> samples = new List<Sample>();
 
         /// <summary>
         /// Stores the number of channels
@@ -167,7 +170,7 @@ namespace Oszillator.Gui
             var positionHeight = this.controlHeight - (a * value + b);
 
             // Calculates the X-Position of the point by time
-            var secondsFromLeft = (DateTime.Now - timeLeft[channel]).TotalSeconds;
+            var secondsFromLeft = (time - timeLeft[channel]).TotalSeconds;
             var xValue = secondsFromLeft * this.pixelsPerSecond;
 
             while (xValue > this.widthSamplePoints)
@@ -177,6 +180,10 @@ namespace Oszillator.Gui
 
             // Now render all the points between last point and this point
             var xValueAsInteger = Convert.ToInt32(Math.Floor(xValue));
+            if (xValueAsInteger < 0)
+            {
+                xValueAsInteger = 0;
+            }
 
             // Paint X: this.currentPosition to xValueAsInteger
             // Paint Y: this.lastPositionOnScreen to positionHeight
@@ -193,10 +200,40 @@ namespace Oszillator.Gui
                     this.currentPosition[channel] = 0;
                 }
             }
+        }
 
-            // Done
-            // Stores the last position, being used to transfer
-            this.lastPositionOnScreen[channel] = positionHeight;
+        /// <summary>
+        /// Adds a sample on queue to draw into window. 
+        /// Ths sample will only be drawn, when 'ShowSamplesOnHold' has been called
+        /// </summary>
+        /// <param name="sample">Sample to be added</param>
+        internal void AddSampleForView(Sample sample)
+        {
+            lock (this)
+            {
+                this.samples.Add(sample);
+            }
+        }
+
+        /// <summary>
+        /// Draws all the samples, that were put on hold
+        /// </summary>
+        public void ShowSamplesOnHold()
+        {
+            List<Sample> tempSamples;
+            lock (this)
+            {
+                tempSamples = this.samples.ToList();
+                this.samples.Clear();
+            }
+
+            foreach (var sample in tempSamples)
+            {
+                for (var n = 0; n < sample.SampleCount; n++)
+                {
+                    this.AddValue(sample.SampleTime, sample.Voltages[n], n);
+                }
+            }
         }
     }
 }

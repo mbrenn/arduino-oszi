@@ -19,7 +19,7 @@ unsigned char convertToStream(unsigned int* pChannels, int nChannels, unsigned c
 void setup()
 {
   pinMode(ledPin, OUTPUT);
-  Serial.begin(9600);
+  Serial.begin(38400);
   
   Serial.println("Depon.Net Oszillator");
   

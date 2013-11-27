@@ -26,6 +26,8 @@ namespace Oszillator
 
         private TextBox[] textBoxes;
 
+        private DateTime lastUpdate = DateTime.Now;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -42,6 +44,8 @@ namespace Oszillator
                 this.Voltage5,
                 this.Voltage6
             };
+
+            CompositionTarget.Rendering += OnFrameUpdate;
         }
 
         /// <summary>
@@ -108,31 +112,37 @@ namespace Oszillator
 
         private void OnSample(Sample sample)
         {
-            this.Dispatcher.Invoke(() =>
+            this.Oszilloskop.AddSampleForView(sample);
+
+            if ((DateTime.Now - this.lastUpdate).TotalMilliseconds > 100)
             {
-                if (this.acquisition == null)
+                this.lastUpdate = DateTime.Now;
+                this.Dispatcher.Invoke(() =>
                 {
-                    // We are currently closing the window (or have closed it)
-                    return;
-                }
+                    if (this.acquisition == null)
+                    {
+                        // We are currently closing the window (or have closed it)
+                        return;
+                    }
 
-                for (var n = 0; n < sample.SampleCount; n++)
-                {
-                    this.textBoxes[n].Text = sample.Voltages[n].ToString("n3") + " V";
-                }
+                    for (var n = 0; n < sample.SampleCount; n++)
+                    {
+                        this.textBoxes[n].Text = sample.Voltages[n].ToString("n3") + " V";
+                    }
 
-                for (var n = 0; n < sample.SampleCount; n++)
-                {
-                    this.Oszilloskop.AddValue(sample.SampleTime, sample.Voltages[n], n);
-                }
+                    var totalSeconds = (DateTime.Now - this.acquisition.SampleStartDate).TotalSeconds;
+                    if (totalSeconds > 1)
+                    {
+                        var sps = this.acquisition.TotalSampleCount / totalSeconds;
+                        this.sps.Text = sps.ToString("n1");
+                    }
+                });
+            }
+        }
 
-                var totalSeconds = (DateTime.Now - this.acquisition.SampleStartDate).TotalSeconds;
-                if (totalSeconds > 1)
-                {
-                    var sps = this.acquisition.TotalSampleCount / totalSeconds;
-                    this.sps.Text = sps.ToString("n1");
-                }
-            });
+        void OnFrameUpdate(object sender, EventArgs e)
+        {
+            this.Oszilloskop.ShowSamplesOnHold();
         }
     }
 }
