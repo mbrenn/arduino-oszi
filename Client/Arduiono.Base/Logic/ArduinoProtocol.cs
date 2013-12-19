@@ -1,4 +1,4 @@
-﻿using Arduino.Base.Logic.Messages;
+﻿using Arduino.Osci.Base.Logic.Messages;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Arduino.Base.Logic
+namespace Arduino.Osci.Base.Logic
 {
     /// <summary>
     /// Performs an abstraction of the connection interface to arduino board

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Arduino.Base.Logic.Messages
+namespace Arduino.Osci.Base.Logic.Messages
 {
     /// <summary>
     /// Defines that a sample sequence had been received

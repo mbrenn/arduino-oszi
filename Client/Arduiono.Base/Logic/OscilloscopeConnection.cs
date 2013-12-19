@@ -1,4 +1,4 @@
-﻿using Arduino.Base.Logic.Messages;
+﻿using Arduino.Osci.Base.Logic.Messages;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
@@ -6,11 +6,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Arduino.Base.Logic
+namespace Arduino.Osci.Base.Logic
 {
-    public class OszillatorConnection : IConnection
+    public class OscilloscopeConnection : IConnection
     {
         private int channelCount;
+
+        public string SerialPortName { get; set; }
+
+        public SerialPort SerialPort { get; set; }
+		
 		
 		public int ChannelCount 
 		{
@@ -19,21 +24,17 @@ namespace Arduino.Base.Logic
 
         private ArduinoProtocol connection;
 
-        public OszillatorConnection(int comPort)
-        {
-            this.ComPort = comPort;
+        public OscilloscopeConnection (string serialPortName)
+		{
+			this.SerialPortName = serialPortName;
         }
-
-        public int ComPort { get; set; }
-
-        public SerialPort SerialPort { get; set; }
 
         public void Setup(int channelCount)
         {
             this.channelCount = channelCount;
 
             this.SerialPort = new SerialPort();
-            this.SerialPort.PortName = "COM" + this.ComPort.ToString();
+            this.SerialPort.PortName = this.SerialPortName;
             this.SerialPort.BaudRate = 38400;
             this.SerialPort.Parity = Parity.None;
             this.SerialPort.StopBits = StopBits.One;

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Arduino.Base.Logic
+namespace Arduino.Osci.Base.Logic
 {
     /// <summary>
     /// Responsible for data acquisition
