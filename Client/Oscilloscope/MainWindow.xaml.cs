@@ -1,4 +1,4 @@
-﻿using Oszillator.Logic;
+﻿using Arduino.Osci.Base.Logic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -62,7 +62,7 @@ namespace Oszillator
                 this.Oszilloskop.SetChannelCount(channelCount);
                 this.Oszilloskop.Start();
 
-                this.acquisition = new DataAcquisition(new OszillatorConnection(3), channelCount);
+                this.acquisition = new DataAcquisition(new OscilloscopeConnection("COM3"), channelCount);
                 this.acquisition.Start();
                 this.acquisition.SampleAction = OnSample;
             }

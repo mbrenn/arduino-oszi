@@ -1,4 +1,4 @@
-﻿using Oszillator.Logic;
+﻿using Arduino.Osci.Base.Logic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
