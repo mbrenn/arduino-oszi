@@ -34,16 +34,22 @@ namespace Arduino.Osci.Base.Logic
         {
             Thread.Sleep(10);
 
-            var sample = new Sample(2);
-            var timeDone = (DateTime.Now- startTime).TotalSeconds;
+            var sample = new Sample(this.channelCount);
+            var timeDone = (DateTime.Now - startTime).TotalSeconds;
 
-            sample.Voltages[0] = Math.Sin(timeDone * 2) + 2;
-            if (this.channelCount > 1)
+            for (var n = 0; n < this.channelCount; n++)
             {
-                sample.Voltages[1] = Math.Cos(timeDone * 3) + 1.5;
+                if (n % 2 == 0)
+                {
+                    sample.Voltages[n] = Math.Sin(timeDone * 2 * (n + 1)) + 2 + 0.1 * n;
+                }
+                else
+                {
+                    sample.Voltages[n] = Math.Cos(timeDone * 2 * n) + 1.5 + 0.1 * n;
+                }
             }
 
-            sample.SampleCount = 2;
+            sample.SampleCount = this.channelCount;
             sample.SampleTime = DateTime.Now;
             return sample;
         }

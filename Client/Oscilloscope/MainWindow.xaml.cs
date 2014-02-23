@@ -66,12 +66,12 @@ namespace Oszillator
         {
             try
             {
-                var channelCount = 1;
+                var channelCount = this.settings.ChannelCount;
 
                 this.Oszilloskop.SetChannelCount(channelCount);
                 this.Oszilloskop.Start();
 
-                this.acquisition = new DataAcquisition(new OscilloscopeConnection("COM3"), channelCount);
+                this.acquisition = new DataAcquisition(OscilloscopeHelper.CreateConnection(this.settings), channelCount);
                 this.acquisition.Start();
                 this.acquisition.SampleAction = OnSample;
             }

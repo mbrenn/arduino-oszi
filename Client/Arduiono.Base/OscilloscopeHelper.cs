@@ -46,16 +46,16 @@ namespace Arduiono.Osci.Base
             return result;
         }
 
-        public static IConnection CreateConnection(string serialPortName)
+        public static IConnection CreateConnection(OsciSettings settings)
         {
-            if (serialPortName == TestingPortName)
+            if (settings.SerialPort == TestingPortName)
             {
                 return new DummyConnection();
             }
 
             else
             {
-                return new OscilloscopeConnection(serialPortName);
+                return new OscilloscopeConnection(settings.SerialPort);
             }
         }
     }
