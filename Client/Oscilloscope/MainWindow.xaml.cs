@@ -55,6 +55,8 @@ namespace Oszillator
             CompositionTarget.Rendering += OnFrameUpdate;
 
             this.settings = OscilloscopeHelper.GetDefaultOsciSettings();
+
+            this.UpdateStatusLine();
         }
 
         /// <summary>
@@ -72,6 +74,7 @@ namespace Oszillator
                 this.Oszilloskop.Start();
 
                 this.acquisition = new DataAcquisition(OscilloscopeHelper.CreateConnection(this.settings), channelCount);
+                this.acquisition.IsRunningChanged += (x, y) => { this.UpdateStatusLine(); };
                 this.acquisition.Start();
                 this.acquisition.SampleAction = OnSample;
             }
@@ -159,9 +162,21 @@ namespace Oszillator
             }
         }
 
-        void OnFrameUpdate(object sender, EventArgs e)
+        private void OnFrameUpdate(object sender, EventArgs e)
         {
             this.Oszilloskop.ShowSamplesOnHold();
+        }
+
+        private void UpdateStatusLine()
+        {
+            var text = string.Format("{0} channels on \"{1}\"", this.settings.ChannelCount, this.settings.SerialPort);
+
+            if (this.acquisition != null && this.acquisition.IsRunning)
+            {
+                text += ", Running";
+            }
+
+            this.StatusLine.Text = text;
         }
     }
 }

@@ -21,6 +21,7 @@
 
         <Gui:OsziLines BorderBrush="Blue" BorderThickness="1" 
                        x:Name="Oszilloskop" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2"/>
+        
         <StackPanel Grid.Row="1" Grid.Column="2">
             <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                 <TextBlock>Voltage 1:</TextBlock>
@@ -52,5 +53,6 @@
             </StackPanel>
 
         </StackPanel>
+        <TextBox Grid.Row="2" Grid.ColumnSpan="3" x:Name="StatusLine"></TextBox>
     </Grid>
 </Window>
