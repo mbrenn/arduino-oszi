@@ -9,10 +9,15 @@ namespace Arduiono.Osci.Base
             set;
         }
 
-        public long ChannelCount
+        public int ChannelCount
         {
             get;
             set;
+        }
+
+        public OsciSettings()
+        {
+            this.ChannelCount = 1;
         }
     }
 }

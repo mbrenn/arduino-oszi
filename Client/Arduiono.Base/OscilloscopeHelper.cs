@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.IO.Ports;
 using Arduino.Osci.Base.Logic;
@@ -24,6 +25,11 @@ namespace Arduiono.Osci.Base
             result.AddRange(SerialPort.GetPortNames());
 
             return result;
+        }
+
+        public static string GetBestPort()
+        {
+            return GetPorts().Where(x => x != TestingPortName).FirstOrDefault();
         }
 
         public static IConnection CreateConnection(string serialPortName)

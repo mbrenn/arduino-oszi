@@ -1,4 +1,5 @@
 ﻿using Arduino.Osci.Base.Logic;
+using Oszillator.Gui;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -87,6 +88,16 @@ namespace Oszillator
             this.acquisition = new DataAcquisition(new DummyConnection(), channelCount);
             this.acquisition.Start();
             this.acquisition.SampleAction = OnSample;
+        }
+
+        private void Settings_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new SettingsDlg(null);
+            dlg.Owner = this;
+            if (dlg.ShowDialog() == true)
+            {
+                // Nothing to do, always true
+            }
         }
 
         private void Stop_Click(object sender, RoutedEventArgs e)

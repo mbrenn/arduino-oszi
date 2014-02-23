@@ -8,6 +8,24 @@ using System.Threading.Tasks;
 
 namespace Arduino.Osci.Base.Logic
 {
+    public class DataAcquisitionEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Gets or sets the acquisition
+        /// </summary>
+        public DataAcquisition Acquisition
+        {
+            get;
+            set;
+        }
+
+        public DataAcquisitionEventArgs(DataAcquisition acq)
+        {
+            this.Acquisition = acq;
+        }
+
+    }
+
     /// <summary>
     /// Responsible for data acquisition
     /// </summary>
@@ -15,11 +33,20 @@ namespace Arduino.Osci.Base.Logic
     {
         private int channelCount = 0;
 
+        /// <summary>
+        /// Gets the value whether the data acquisition is currently running.
+        /// If this value gets changed
+        /// </summary>
         public bool IsRunning
         {
             get;
             private set;
         }
+
+        /// <summary>
+        /// This event is thrown, when the IsRunning variable has been changed
+        /// </summary>
+        public event EventHandler IsRunningChanged;
 
         public int TotalSampleCount
         {
@@ -60,6 +87,18 @@ namespace Arduino.Osci.Base.Logic
             this.Connection = connection;
         }
 
+        /// <summary>
+        /// Calls the IsRunningChanged event
+        /// </summary>
+        private void OnRunningChanged()
+        {
+            var e = this.IsRunningChanged;
+            if (e != null)
+            {
+                e(this, EventArgs.Empty);
+            }
+        }
+
         public void Start()
         {
             if (this.IsRunning)
@@ -74,6 +113,8 @@ namespace Arduino.Osci.Base.Logic
             {
                 this.IsRunning = true;
             }
+
+            this.OnRunningChanged();
 
             this.SampleThread = new Thread(this.SampleLoop);
             this.SampleThread.Name = "Sample Thread";
@@ -134,6 +175,8 @@ namespace Arduino.Osci.Base.Logic
             {
                 this.IsRunning = false;
             }
+
+            this.OnRunningChanged();
 
             this.SampleThread.Join(1000);
 

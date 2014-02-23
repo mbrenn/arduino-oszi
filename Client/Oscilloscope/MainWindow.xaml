@@ -17,7 +17,7 @@
         </Grid.ColumnDefinitions>
         <Button Content="Start" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="Start_Click" Grid.Column="0"/>
         <Button Content="Stop" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="Stop_Click" Grid.Column="1"/>
-        <Button Content="Dummy-Start" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="DummyStart_Click" Grid.Column="2"/>
+        <Button Content="Settings" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="Settings_Click" Grid.Column="2"/>
 
         <Gui:OsziLines BorderBrush="Blue" BorderThickness="1" 
                        x:Name="Oszilloskop" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2"/>
