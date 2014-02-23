@@ -24,6 +24,11 @@ namespace Oszillator.Gui
 
         public SettingsDlg(OsciSettings settings)
         {
+            if (settings == null)
+            {
+                throw new ArgumentNullException("settings");
+            }
+
             this.settings = settings;
             InitializeComponent();
         }
@@ -39,11 +44,14 @@ namespace Oszillator.Gui
             this.Channels.ItemsSource = channels;
 
             this.Channels.SelectedIndex = settings.ChannelCount - 1;
-            this.Channels.SelectedItem = this.ports.Where(x => x == this.settings.SerialPort).FirstOrDefault();
+            this.SerialPorts.SelectedItem = this.ports.Where(x => x == this.settings.SerialPort).FirstOrDefault();
         }
 
         private void OK_Click(object sender, RoutedEventArgs e)
         {
+            this.settings.ChannelCount = Convert.ToInt32(this.Channels.SelectedValue);
+            this.settings.SerialPort = Convert.ToString(this.SerialPorts.SelectedValue);
+
             this.DialogResult = true;
             this.Close();
         }

@@ -29,7 +29,21 @@ namespace Arduiono.Osci.Base
 
         public static string GetBestPort()
         {
-            return GetPorts().Where(x => x != TestingPortName).FirstOrDefault();
+            var result = GetPorts().Where(x => x != TestingPortName).FirstOrDefault();
+            if (string.IsNullOrEmpty(result))
+            {
+                return TestingPortName;
+            }
+
+            return result;
+        }
+
+        public static OsciSettings GetDefaultOsciSettings()
+        {
+            var result = new OsciSettings();
+            result.ChannelCount = 1;
+            result.SerialPort = GetBestPort();
+            return result;
         }
 
         public static IConnection CreateConnection(string serialPortName)

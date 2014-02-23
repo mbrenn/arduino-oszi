@@ -1,4 +1,5 @@
 ﻿using Arduino.Osci.Base.Logic;
+using Arduiono.Osci.Base;
 using Oszillator.Gui;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,11 @@ namespace Oszillator
     /// </summary>
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// Stores the osci settings
+        /// </summary>
+        private OsciSettings settings;
+
         private DataAcquisition acquisition;
 
         private TextBox[] textBoxes;
@@ -47,6 +53,8 @@ namespace Oszillator
             };
 
             CompositionTarget.Rendering += OnFrameUpdate;
+
+            this.settings = OscilloscopeHelper.GetDefaultOsciSettings();
         }
 
         /// <summary>
@@ -92,7 +100,7 @@ namespace Oszillator
 
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
-            var dlg = new SettingsDlg(null);
+            var dlg = new SettingsDlg(this.settings);
             dlg.Owner = this;
             if (dlg.ShowDialog() == true)
             {
