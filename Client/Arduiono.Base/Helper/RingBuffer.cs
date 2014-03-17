@@ -18,7 +18,7 @@ namespace Arduino.Generic
         /// the internal buffer
         /// </summary>
         private T[] buffer;
-        
+
         /// <summary>
         /// The all-over position within the ring buffer. The position
         /// increases continously by adding new items to the buffer. This
@@ -26,33 +26,33 @@ namespace Arduino.Generic
         /// buffer.
         /// </summary>
         private int position;
-        
+
         /// <summary>
         /// The current version of the buffer, this is required for a correct
         /// exception handling while enumerating over the items of the buffer.
         /// </summary>
         private long version;
-        
+
         /// <summary>
         /// Creates a new instance of a <see cref="RingBuffer&lt;T&gt;"/> with a
         /// specified cache size.
         /// </summary>
         /// <param name="capacity">The maximal count of items to be stored within
         /// the ring buffer.</param>
-        public RingBuffer (int capacity)
+        public RingBuffer(int capacity)
         {
             // validate capacity
             if (capacity <= 0)
-                throw new ArgumentException (
+                throw new ArgumentException(
                     "Must be greater than zero",
                     "capacity"
                 );
-            
+
             // set capacity and init the cache
             this.Capacity = capacity;
             this.buffer = new T[capacity];
         }
-        
+
         /// <summary>
         /// Gets or sets an item for a specified position within the ring buffer.
         /// </summary>
@@ -60,17 +60,20 @@ namespace Arduino.Generic
         /// <returns>The fond item at the specified position within the ring buffer.
         /// </returns>
         /// <exception cref="IndexOutOfRangeException"></exception>
-        public T this [int index] {
-            get {
+        public T this[int index]
+        {
+            get
+            {
                 // validate the index
                 if (index < 0 || index >= Count)
-                    throw new IndexOutOfRangeException ();
+                    throw new IndexOutOfRangeException();
                 // calculate the relative position within the rolling base array
                 int index2 = (position - Count + index) % Capacity;
-                return this.buffer [index2];
+                return this.buffer[index2];
             }
-            set { Insert (index, value); }
+            set { Insert(index, value); }
         }
+
         /// <summary>
         /// Gets the maximal count of items within the ring buffer.
         /// </summary>
@@ -79,38 +82,42 @@ namespace Arduino.Generic
         /// Get the current count of items within the ring buffer.
         /// </summary>
         public int Count { get; private set; }
-        
+
         /// <summary>
         /// Adds a new item to the buffer.
         /// </summary>
         /// <param name="item">The item to be added to the buffer.</param>
-        public void Add (T item)
+        public void Add(T item)
         {
             // add a new item to the current relative position within the
             // buffer and increase the position
-            this.buffer [position++ % Capacity] = item;
+            this.buffer[position++ % Capacity] = item;
             // increase the count if capacity is not yet reached
-            if (Count < Capacity) {
+            if (Count < Capacity)
+            {
                 Count++;
             }
-            
+
             // buffer changed; next version
             this.version++;
         }
+
         /// <summary>
         /// Clears the whole buffer and releases all referenced objects
         /// currently stored within the buffer.
         /// </summary>
-        public void Clear ()
+        public void Clear()
         {
-            for (int i = 0; i < Count; i++) {
-                this.buffer [i] = default(T);
+            for (int i = 0; i < Count; i++)
+            {
+                this.buffer[i] = default(T);
             }
-            
+
             position = 0;
             Count = 0;
             this.version++;
         }
+
         /// <summary>
         /// Determines if a specified item is currently present within
         /// the buffer.
@@ -119,11 +126,12 @@ namespace Arduino.Generic
         /// buffer.</param>
         /// <returns>True if the specified item is currently present within
         /// the buffer; otherwise false.</returns>
-        public bool Contains (T item)
+        public bool Contains(T item)
         {
-            int index = IndexOf (item);
+            int index = IndexOf(item);
             return index != -1;
         }
+
         /// <summary>
         /// Copies the current items within the buffer to a specified array.
         /// </summary>
@@ -131,27 +139,31 @@ namespace Arduino.Generic
         /// the buffer to.</param>
         /// <param name="arrayIndex">The start position witihn the target
         /// array to start copying.</param>
-        public void CopyTo (T[] array, int arrayIndex)
+        public void CopyTo(T[] array, int arrayIndex)
         {
-            for (int i = 0; i < Count; i++) {
-                array [i + arrayIndex] = this.buffer [(position - Count + i) % Capacity];
+            for (int i = 0; i < Count; i++)
+            {
+                array[i + arrayIndex] = this.buffer[(position - Count + i) % Capacity];
             }
         }
+
         /// <summary>
         /// Gets an enumerator over the current items within the buffer.
         /// </summary>
         /// <returns>An enumerator over the current items within the buffer.
         /// </returns>
-        public IEnumerator<T> GetEnumerator ()
+        public IEnumerator<T> GetEnumerator()
         {
             long version = this.version;
-            
-            for (int i = 0; i < Count; i++) {
+
+            for (int i = 0; i < Count; i++)
+            {
                 if (this.version != version)
-                    throw new InvalidOperationException ("Collection changed");
-                yield return this [i];
+                    throw new InvalidOperationException("Collection changed");
+                yield return this[i];
             }
         }
+
         /// <summary>
         /// Gets the position of a specied item within the ring buffer.
         /// </summary>
@@ -159,22 +171,24 @@ namespace Arduino.Generic
         /// <returns>The zero based index of the found item within the
         /// buffer. If the item was not present within the buffer, this
         /// method returns -1.</returns>
-        public int IndexOf (T item)
+        public int IndexOf(T item)
         {
             // loop over the current count of items
-            for (int i = 0; i < Count; i++) {
+            for (int i = 0; i < Count; i++)
+            {
                 // get the item at the relative position within the internal array
-                T item2 = this.buffer [(position - Count + i) % Capacity];
+                T item2 = this.buffer[(position - Count + i) % Capacity];
                 // if both items are null, return true
                 if (null == item && null == item2)
                     return i;
                 // if equal return the position
-                if (item != null && item.Equals (item2))
+                if (item != null && item.Equals(item2))
                     return i;
             }
             // nothing found
             return -1;
         }
+
         /// <summary>
         /// Inserts an item at a specified position into the buffer.
         /// </summary>
@@ -192,40 +206,45 @@ namespace Arduino.Generic
         /// at a specified position within the buffer causes causes all present
         /// items below the specified position to be moved one position.
         /// </remarks>
-        public void Insert (int index, T item)
+        public void Insert(int index, T item)
         {
             // validate index
             if (index < 0 || index > Count)
             {
-                throw new IndexOutOfRangeException ();
+                throw new IndexOutOfRangeException();
             }
-            
+
             // add if index equals to count
-            if (index == Count) {
-                Add (item);
+            if (index == Count)
+            {
+                Add(item);
                 return;
             }
+
             // get the maximal count of items to be moved
-            int count = Math.Min (Count, Capacity - 1) - index;
+            int count = Math.Min(Count, Capacity - 1) - index;
             // get the relative position of the new item within the buffer
             int index2 = (position - Count + index) % Capacity;
             // move all items below the specified position
-            for (int i = index2 + count; i > index2; i--) {
+            for (int i = index2 + count; i > index2; i--)
+            {
                 int to = i % Capacity;
                 int from = (i - 1) % Capacity;
-                this.buffer [to] = this.buffer [from];
+                this.buffer[to] = this.buffer[from];
             }
             // set the new item
-            this.buffer [index2] = item;
+            this.buffer[index2] = item;
             // adjust storage information
-            if (Count < Capacity) {
+            if (Count < Capacity)
+            {
                 Count++;
                 position++;
             }
-            
+
             // buffer changed; next version
             this.version++;
         }
+
         /// <summary>
         /// Removes a specified item from the current buffer.
         /// </summary>
@@ -240,20 +259,21 @@ namespace Arduino.Generic
         /// item. If the item was found, the deletion requires a move of all        
         /// items stored abouve the found position.
         /// </remarks>
-        public bool Remove (T item)
+        public bool Remove(T item)
         {
             // find the position of the specified item
-            int index = IndexOf (item);
+            int index = IndexOf(item);
             // item was not found; return false
             if (index == -1)
             {
                 return false;
             }
-            
+
             // remove the item at the specified position
-            RemoveAt (index);
+            RemoveAt(index);
             return true;
         }
+
         /// <summary>
         /// Removes an item at a specified position within the buffer.
         /// </summary>
@@ -265,31 +285,32 @@ namespace Arduino.Generic
         /// working with a large buffer capacity. The deletion requires a move
         /// of all items stored abouve the found position.
         /// </remarks>
-        public void RemoveAt (int index)
+        public void RemoveAt(int index)
         {
             // validate the index
             if (index < 0 || index >= Count)
-                throw new IndexOutOfRangeException ();
+                throw new IndexOutOfRangeException();
             // move all items above the specified position one step
             // closer to zeri
-            for (int i = index; i < Count - 1; i++) {
+            for (int i = index; i < Count - 1; i++)
+            {
                 // get the next relative target position of the item
                 int to = (position - Count + i) % Capacity;
                 // get the next relative source position of the item
                 int from = (position - Count + i + 1) % Capacity;
                 // move the item
-                this.buffer [to] = this.buffer [from];
+                this.buffer[to] = this.buffer[from];
             }
-            
+
             // get the relative position of the last item, which becomes empty
             // after deletion and set the item as empty
             int last = (position - 1) % Capacity;
-            this.buffer [last] = default(T);
-            
+            this.buffer[last] = default(T);
+
             // adjust storage information
             position--;
             Count--;
-            
+
             // buffer changed; next version
             this.version++;
         }
@@ -298,14 +319,15 @@ namespace Arduino.Generic
         /// Gets if the buffer is read-only. This method always returns false.
         /// </summary>
         bool ICollection<T>.IsReadOnly { get { return false; } }
+
         /// <summary>
         /// See generic implementation of <see cref="GetEnumerator"/>.
         /// </summary>
         /// <returns>See generic implementation of <see cref="GetEnumerator"/>.
         /// </returns>
-        IEnumerator IEnumerable.GetEnumerator ()
+        IEnumerator IEnumerable.GetEnumerator()
         {
-            return this.GetEnumerator ();
+            return this.GetEnumerator();
         }
     }
 }
