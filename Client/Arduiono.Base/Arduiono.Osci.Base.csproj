@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helper\RingBuffer.cs" />
     <Compile Include="Logic\ArduinoProtocol.cs" />
     <Compile Include="Logic\DataAcquisition.cs" />
     <Compile Include="Logic\DummyConnection.cs" />
