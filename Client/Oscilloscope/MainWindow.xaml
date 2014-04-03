@@ -19,7 +19,7 @@
         <Button Content="Stop" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="Stop_Click" Grid.Column="1"/>
         <Button Content="Settings" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="Settings_Click" Grid.Column="2"/>
 
-        <Gui:OsziLines BorderBrush="Blue" BorderThickness="1" 
+        <Gui:OsziLinesDrawing BorderBrush="Blue" BorderThickness="1" 
                        x:Name="Oszilloskop" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2"/>
         
         <StackPanel Grid.Row="1" Grid.Column="2">

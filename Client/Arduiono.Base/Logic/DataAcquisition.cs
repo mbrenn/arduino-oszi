@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Arduino.Generic;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -81,6 +82,11 @@ namespace Arduino.Osci.Base.Logic
             set;
         }
 
+        /// <summary>
+        /// Stores the samples
+        /// </summary>
+        private RingBuffer<Sample> buffer = new RingBuffer<Sample>(10000);
+
         public DataAcquisition(IConnection connection, int channelCount)
         {
             this.channelCount = channelCount;
@@ -146,6 +152,7 @@ namespace Arduino.Osci.Base.Logic
                     lock (this)
                     {
                         this.TotalSampleCount++;
+                        this.buffer.Add(sample);
                     }
 
                     if (this.SampleAction != null)
