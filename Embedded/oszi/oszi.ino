@@ -20,13 +20,22 @@ void setup()
 {
   pinMode(ledPin, OUTPUT);
   Serial.begin(38400);
-  
   Serial.println("Depon.Net Oszillator");
   
   inputState = 0;
   frameCount = 0;
   stateServerRun = Stop;
-  digitalWrite(ledPin,LOW);
+  switchLedOff();
+}
+
+void switchLedOn()
+{
+  digitalWrite(ledPin, HIGH);
+}
+
+void switchLedOff()
+{
+  digitalWrite(ledPin, LOW);
 }
 
 void loop()
@@ -52,7 +61,7 @@ void loopOszi()
         {
           stateServerRun = Running;
           sendSyncSequence();
-          digitalWrite(ledPin,HIGH);
+          switchLedOn();
         }
       }
       else if (incoming == 's')
@@ -64,7 +73,7 @@ void loopOszi()
         else
         {
           stateServerRun = Stopping;
-          digitalWrite(ledPin,LOW);
+          switchLedOff();
         }
       }      
       else if (incoming == 't')
@@ -138,6 +147,16 @@ void loopOszi()
   else if (stateServerRun == Stopping)
   {
     // Sends out stop sequences until client has confirmed by 't'
+    unsigned long m = millis() / 200;
+    if ( m % 2 == 0 )
+    {
+      switchLedOn();
+    }
+    else
+    {
+      switchLedOff();
+    }
+    
     sendStopStreamSequence();
   }
 }
