@@ -29,7 +29,7 @@ namespace Oszillator.Gui
         /// <summary>
         /// Stores the span from the left to the right side of the window
         /// </summary>
-        public TimeSpan spanWindow = TimeSpan.FromSeconds(2);
+        public TimeSpan spanWindow = TimeSpan.FromSeconds(1);
 
         /// <summary>
         /// Gives the value at top of screen
@@ -40,6 +40,12 @@ namespace Oszillator.Gui
         /// Gives the value at bottom of screen
         /// </summary>
         public double ValueAtBottom = -1;
+
+        public double LinesPerDrawing
+        {
+            get;
+            set;
+        }
 
         private Color[] lineColors = new Color[]
         {
@@ -75,6 +81,7 @@ namespace Oszillator.Gui
 
         protected override void OnRender(DrawingContext drawingContext)
         {
+            var drawings = 0;
             var width = this.ActualWidth;
             var height = this.ActualHeight;
 
@@ -103,6 +110,8 @@ namespace Oszillator.Gui
             var b = -height * this.ValueAtBottom / (this.ValueAtTop - this.ValueAtBottom);
 
             // Now paint
+            var startPoint = new Point();
+            var endPoint = new Point();
             for (var channel = 0; channel < this.DataAcquisition.ChannelCount; channel++)
             {
                 var lastX = Double.MinValue;
@@ -129,13 +138,24 @@ namespace Oszillator.Gui
 
                     if (lastX != Double.MinValue && lastX <= x)
                     {
-                        drawingContext.DrawLine(this.pens[channel], new Point(lastX, lastY), new Point(x, y));
+                        startPoint.X = lastX;
+                        startPoint.Y = lastY;
+                        endPoint.X = x;
+                        endPoint.Y = y;
+
+                        if (startPoint.X != endPoint.X)
+                        {
+                            drawingContext.DrawLine(this.pens[channel], startPoint, endPoint);
+                            drawings++;
+                            lastY = y;
+                        }
                     }
 
                     lastX = x;
-                    lastY = y;
                 }
             }
+
+            this.LinesPerDrawing = drawings;
         }
 
         public void Start()

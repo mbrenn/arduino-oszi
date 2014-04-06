@@ -93,7 +93,7 @@ namespace Arduino.Osci.Base.Logic
         /// <summary>
         /// Stores the samples for a certain amount of time
         /// </summary>
-        private RingBuffer<Sample> buffer = new RingBuffer<Sample>(1000);
+        private RingBuffer<Sample> buffer = new RingBuffer<Sample>(10000);
 
         /// <summary>
         /// Gets the ring buffer. Not Threadsafe
@@ -159,38 +159,50 @@ namespace Arduino.Osci.Base.Logic
             this.TotalSampleCount = 0;
         }
 
+        public static DateTime lastUpdate;
+
         public void SampleLoop()
         {
-            Debug.WriteLine("Starting sample loop");
-
-            while (true)
+            try
             {
-                lock (this)
-                {
-                    if (!this.IsRunning)
-                    {
-                        break;
-                    }
-                }
+                Debug.WriteLine("Starting sample loop with thread: " + 
+                    Thread.CurrentThread.ManagedThreadId.ToString("X4"));
 
-                // Do sampling
-                var sample = this.Connection.Read();
-                if (sample != null)
+                while (true)
                 {
+                    lastUpdate = DateTime.Now;
+
                     lock (this)
                     {
-                        this.TotalSampleCount++;
-                        this.buffer.Add(sample);
+                        if (!this.IsRunning)
+                        {
+                            break;
+                        }
                     }
 
-                    if (this.SampleAction != null)
+                    // Do sampling
+                    var sample = this.Connection.Read();
+                    if (sample != null)
                     {
-                        this.SampleAction(sample);
+                        lock (this)
+                        {
+                            this.TotalSampleCount++;
+                            this.buffer.Add(sample);
+                        }
+
+                        if (this.SampleAction != null)
+                        {
+                            this.SampleAction(sample);
+                        }
                     }
                 }
-            }
 
-            Debug.WriteLine("Stopping sample loop");
+                Debug.WriteLine("Stopping sample loop");
+            }
+            finally
+            {
+                Debug.WriteLine("Finalizing sample loop");
+            }
         }
 
         /// <summary>

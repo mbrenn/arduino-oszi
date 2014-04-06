@@ -271,13 +271,19 @@ namespace Arduino.Osci.Base.Logic
             {
                 lock (this.messageSync)
                 {
-                    if (this.isRunning)
+                    if (!this.isRunning)
                     {
                         return;
                     }
                 }
 
                 this.stopMessageReceived.WaitOne(500);
+
+                if((DateTime.Now - DataAcquisition.lastUpdate).TotalSeconds > 3.0)
+                {
+                    Debug.WriteLine("Timeout for WaitForStop has been reached.");
+                    return;
+                }
             }
         }
     }
