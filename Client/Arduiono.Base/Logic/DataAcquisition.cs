@@ -83,14 +83,42 @@ namespace Arduino.Osci.Base.Logic
         }
 
         /// <summary>
-        /// Stores the samples
+        /// Gets the number of channels to be used
+        /// </summary>
+        public int ChannelCount
+        {
+            get { return this.channelCount; }
+        }
+
+        /// <summary>
+        /// Stores the samples for a certain amount of time
         /// </summary>
         private RingBuffer<Sample> buffer = new RingBuffer<Sample>(10000);
+
+        /// <summary>
+        /// Gets the ring buffer. Not Threadsafe
+        /// </summary>
+        public RingBuffer<Sample> Buffer
+        {
+            get { return this.buffer; }
+        }
 
         public DataAcquisition(IConnection connection, int channelCount)
         {
             this.channelCount = channelCount;
             this.Connection = connection;
+        }
+
+        /// <summary>
+        /// Returns the buffer as threadsafe instance
+        /// </summary>
+        /// <returns></returns>
+        public List<Sample> GetBuffer()
+        {
+            lock (this)
+            {
+                return this.buffer.ToList();
+            }
         }
 
         /// <summary>

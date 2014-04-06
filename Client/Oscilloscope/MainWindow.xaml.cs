@@ -69,36 +69,20 @@ namespace Oszillator
             try
             {
                 var channelCount = this.settings.ChannelCount;
-
-                this.Oszilloskop.SetChannelCount(channelCount);
-                this.Oszilloskop.Start();
-
+                
                 this.acquisition = new DataAcquisition(OscilloscopeHelper.CreateConnection(this.settings), channelCount);
                 this.acquisition.IsRunningChanged += (x, y) => { this.UpdateStatusLine(); };
                 this.acquisition.Start();
                 this.acquisition.SampleAction = OnSample;
+
+                this.Oszilloskop.DataAcquisition = this.acquisition;
+                this.Oszilloskop.Start();
+
             }
             catch (Exception exc)
             {
                 MessageBox.Show(exc.Message);
             }
-        }
-
-        /// <summary>
-        /// Starts the oscilloscope with Dummy connection
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void DummyStart_Click(object sender, RoutedEventArgs e)
-        {
-            var channelCount = 2;
-
-            this.Oszilloskop.SetChannelCount(channelCount);
-            this.Oszilloskop.Start();
-            
-            this.acquisition = new DataAcquisition(new DummyConnection(), channelCount);
-            this.acquisition.Start();
-            this.acquisition.SampleAction = OnSample;
         }
 
         private void Settings_Click(object sender, RoutedEventArgs e)
@@ -134,8 +118,6 @@ namespace Oszillator
 
         private void OnSample(Sample sample)
         {
-            this.Oszilloskop.AddSampleForView(sample);
-
             if ((DateTime.Now - this.lastUpdate).TotalMilliseconds > 100)
             {
                 this.lastUpdate = DateTime.Now;
