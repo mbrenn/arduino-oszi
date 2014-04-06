@@ -245,17 +245,17 @@ namespace Arduino.Osci.Base.Logic
 
             if (this.analogChannelCount >= 4)
             {
-                sample.Voltages[4] = ((tempBuffer[3] & 0x03) << 6) + ((tempBuffer[4] & 0xFF) >> 0);
+                sample.Voltages[3] = ((tempBuffer[3] & 0x03) << 6) + ((tempBuffer[4] & 0xFF) >> 0);
             }
 
             if (this.analogChannelCount >= 5)
             {
-                sample.Voltages[5] = (tempBuffer[5] << 2) + ((tempBuffer[6] & 0xC0) >> 6);
+                sample.Voltages[4] = (tempBuffer[5] << 2) + ((tempBuffer[6] & 0xC0) >> 6);
             }
 
             if (this.analogChannelCount >= 6)
             {
-                sample.Voltages[6] = ((tempBuffer[6] & 0x3F) << 4) + ((tempBuffer[7] & 0xF0) >> 4);
+                sample.Voltages[5] = ((tempBuffer[6] & 0x3F) << 4) + ((tempBuffer[7] & 0xF0) >> 4);
             }
 
             for (var n = 0; n < this.analogChannelCount; n++)

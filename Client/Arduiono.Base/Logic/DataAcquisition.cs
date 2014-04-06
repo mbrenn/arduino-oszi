@@ -93,7 +93,7 @@ namespace Arduino.Osci.Base.Logic
         /// <summary>
         /// Stores the samples for a certain amount of time
         /// </summary>
-        private RingBuffer<Sample> buffer = new RingBuffer<Sample>(10000);
+        private RingBuffer<Sample> buffer = new RingBuffer<Sample>(1000);
 
         /// <summary>
         /// Gets the ring buffer. Not Threadsafe

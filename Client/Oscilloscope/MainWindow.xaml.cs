@@ -140,17 +140,25 @@ namespace Oszillator
                         var sps = this.acquisition.TotalSampleCount / totalSeconds;
                         this.sps.Text = sps.ToString("n1");
                     }
-
-                    this.fillSize.Text = string.Format("{0} / {1}",
-                        this.acquisition.Buffer.FillSize.ToString("n0"), 
-                        this.acquisition.Buffer.Capacity);
                 });
             }
         }
 
+        private int frames;
+
+        private DateTime lastUpdateOfFrame;
+
         private void OnFrameUpdate(object sender, EventArgs e)
         {
             this.Oszilloskop.ShowSamplesOnHold();
+
+            this.frames++;
+            if ((DateTime.Now - this.lastUpdateOfFrame).TotalSeconds > 1)
+            {
+                this.fps.Text = this.frames.ToString();
+                this.frames = 0;
+                this.lastUpdateOfFrame = DateTime.Now;
+            }
         }
 
         private void UpdateStatusLine()

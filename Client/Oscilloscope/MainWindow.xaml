@@ -2,61 +2,82 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Gui="clr-namespace:Oszillator.Gui" x:Class="Oszillator.MainWindow"
-        Title="MainWindow" Height="350" Width="750"
+        Title="Depon.Net Oszilloskop via Arduino" Height="500" Width="900"
         Initialized="Window_Initialized" Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition />
+            <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <Button Content="Start" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="Start_Click" Grid.Column="0"/>
-        <Button Content="Stop" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="Stop_Click" Grid.Column="1"/>
-        <Button Content="Settings" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="Settings_Click" Grid.Column="2"/>
-
-        <Gui:OsziLinesDrawing BorderBrush="Blue" BorderThickness="1" 
-                       x:Name="Oszilloskop" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2"/>
-        
-        <StackPanel Grid.Row="1" Grid.Column="2">
-            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                <TextBlock>Voltage 1:</TextBlock>
-                <TextBox x:Name="Voltage1" Width="100" TextAlignment="Right" IsReadOnly="true"></TextBox>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                <TextBlock>Voltage 2:</TextBlock>
-                <TextBox x:Name="Voltage2" Width="100" TextAlignment="Right" IsReadOnly="true"></TextBox>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                <TextBlock>Voltage 3:</TextBlock>
-                <TextBox x:Name="Voltage3" Width="100" TextAlignment="Right" IsReadOnly="true"></TextBox>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                <TextBlock>Voltage 4:</TextBlock>
-                <TextBox x:Name="Voltage4" Width="100" TextAlignment="Right" IsReadOnly="true"></TextBox>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                <TextBlock>Voltage 5:</TextBlock>
-                <TextBox x:Name="Voltage5" Width="100" TextAlignment="Right" IsReadOnly="true"></TextBox>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                <TextBlock>Voltage 6:</TextBlock>
-                <TextBox x:Name="Voltage6" Width="100" TextAlignment="Right" IsReadOnly="true"></TextBox>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                <TextBlock>Sample/s</TextBlock>
-                <TextBox x:Name="sps" Width="100" TextAlignment="Right" IsReadOnly="true"></TextBox>
-            </StackPanel>
-
-            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                <TextBlock>Fillsize</TextBlock>
-                <TextBox x:Name="fillSize" Width="100" TextAlignment="Right" IsReadOnly="true"></TextBox>
-            </StackPanel>
+        <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="1">
+            <StackPanel.Resources>
+                <Style x:Key="TouchButton">
+                    <Setter Property="Button.Margin" Value="10,10,10,10" />
+                    <Setter Property="Button.VerticalAlignment" Value="Top" />
+                    <Setter Property="Button.Width" Value="100" />
+                    <Setter Property="Button.Padding" Value="20, 10, 20, 10" />
+                </Style>
+            </StackPanel.Resources>
+            <Button Content="Start" HorizontalAlignment="Left" Style="{StaticResource TouchButton}" Click="Start_Click" Grid.Column="0" Background="LightGreen"/>
+            <Button Content="Stop" HorizontalAlignment="Left" Style="{StaticResource TouchButton}" Click="Stop_Click" Grid.Column="1" Background="LightPink"/>
+            <Button Content="Settings" HorizontalAlignment="Left" Style="{StaticResource TouchButton}" Click="Settings_Click" Grid.Column="2" Background="LightBlue"/>
         </StackPanel>
-        <TextBox Grid.Row="2" Grid.ColumnSpan="3" x:Name="StatusLine"></TextBox>
+
+        <Gui:OsziLinesDrawing x:Name="Oszilloskop" Grid.Column="0" Grid.Row="0" />
+        
+        <StackPanel Grid.Row="1" Grid.Column="0">
+            <Grid>
+                <Grid.Resources>
+                    <Style x:Key="ValueLabel">
+                        <Setter Property="TextBlock.Margin" Value="10,10,0,10" />
+                        <Setter Property="TextBlock.FontSize" Value="14" />
+                    </Style>
+                    <Style x:Key="ValueItself">
+                        <Setter Property="TextBox.Width" Value="70" />
+                        <Setter Property="TextBox.TextAlignment" Value="Right" />
+                        <Setter Property="TextBox.IsReadOnly" Value="True" />
+                        <Setter Property="TextBox.Margin" Value="5,10,20,10" />
+                        <Setter Property="TextBox.FontSize" Value="14" />
+                    </Style>
+                </Grid.Resources>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource ValueLabel}" >Voltage 1:</TextBlock>
+                <TextBox Grid.Row="0" Grid.Column="1" x:Name="Voltage1" Style="{StaticResource ValueItself}"></TextBox>
+                <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource ValueLabel}">Voltage 2:</TextBlock>
+                <TextBox Grid.Row="1" Grid.Column="1" x:Name="Voltage2" Style="{StaticResource ValueItself}"></TextBox>
+                <TextBlock Grid.Row="0" Grid.Column="2" Style="{StaticResource ValueLabel}">Voltage 3:</TextBlock>
+                <TextBox Grid.Row="0" Grid.Column="3" x:Name="Voltage3" Style="{StaticResource ValueItself}"></TextBox>
+                <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource ValueLabel}">Voltage 4:</TextBlock>
+                <TextBox Grid.Row="1" Grid.Column="3" x:Name="Voltage4" Style="{StaticResource ValueItself}"></TextBox>
+                <TextBlock Grid.Row="0" Grid.Column="4" Style="{StaticResource ValueLabel}">Voltage 5:</TextBlock>
+                <TextBox Grid.Row="0" Grid.Column="5" x:Name="Voltage5" Style="{StaticResource ValueItself}"></TextBox>
+                <TextBlock Grid.Row="1" Grid.Column="4" Style="{StaticResource ValueLabel}">Voltage 6:</TextBlock>
+                <TextBox Grid.Row="1" Grid.Column="5" x:Name="Voltage6" Style="{StaticResource ValueItself}"></TextBox>
+                <TextBlock Grid.Row="0" Grid.Column="6" Style="{StaticResource ValueLabel}">Sample/s</TextBlock>
+                <TextBox Grid.Row="0" Grid.Column="7" x:Name="sps" Style="{StaticResource ValueItself}"></TextBox>
+                <TextBlock Grid.Row="1" Grid.Column="6" Style="{StaticResource ValueLabel}">Frames/s</TextBlock>
+                <TextBox Grid.Row="1" Grid.Column="7" x:Name="fps" Style="{StaticResource ValueItself}"></TextBox>
+            </Grid>
+        </StackPanel>
+        <TextBox Grid.Row="2" Grid.ColumnSpan="2" x:Name="StatusLine"></TextBox>
     </Grid>
 </Window>
