@@ -140,6 +140,10 @@ namespace Oszillator
                         var sps = this.acquisition.TotalSampleCount / totalSeconds;
                         this.sps.Text = sps.ToString("n1");
                     }
+
+                    this.fillSize.Text = string.Format("{0} / {1}",
+                        this.acquisition.Buffer.FillSize.ToString("n0"), 
+                        this.acquisition.Buffer.Capacity);
                 });
             }
         }

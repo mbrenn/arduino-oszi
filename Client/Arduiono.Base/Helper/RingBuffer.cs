@@ -329,5 +329,17 @@ namespace Arduino.Generic
         {
             return this.GetEnumerator();
         }
+
+        /// <summary>
+        /// Gets the fill size of the buffer
+        /// </summary>
+        /// <returns>Number of bytes being allocated</returns>
+        public int FillSize
+        {
+            get
+            {
+                return Math.Min(this.Count, this.Capacity);
+            }
+        }
     }
 }
