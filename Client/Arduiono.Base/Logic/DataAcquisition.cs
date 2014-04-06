@@ -112,7 +112,7 @@ namespace Arduino.Osci.Base.Logic
         /// <summary>
         /// Returns the buffer as threadsafe instance
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Gets the buffer of the list</returns>
         public List<Sample> GetBuffer()
         {
             lock (this)

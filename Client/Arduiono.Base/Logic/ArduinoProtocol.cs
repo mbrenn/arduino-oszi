@@ -44,7 +44,7 @@ namespace Arduino.Osci.Base.Logic
 
         private int[] messageLengths =
         {
-            2, 3, 4, 5, 7, 8        
+            2, 3, 4, 5, 7, 8
         };
 
         /// <summary>
@@ -84,11 +84,6 @@ namespace Arduino.Osci.Base.Logic
 
         public void SendStartCommand()
         {
-            if (this.isRunning)
-            {
-                throw new InvalidOperationException("Client is already running");
-            }
-
             lock (this.messageSync)
             {
                 this.port.Write(new char[] { 'g', analogChannelCount.ToString()[0] }, 0, 1);
@@ -100,11 +95,6 @@ namespace Arduino.Osci.Base.Logic
 
         public void SendStopCommand()
         {
-            if (!this.isRunning)
-            {
-                throw new InvalidOperationException("Client is not running");
-            }
-
             lock (this.messageSync)
             {
                 this.port.Write(new char[] { 's', analogChannelCount.ToString()[0] }, 0, 1);
@@ -116,12 +106,7 @@ namespace Arduino.Osci.Base.Logic
 
         public void SendStopConfirmationCommand()
         {
-            if (this.isRunning)
-            {
-                throw new InvalidOperationException("Stop sequence has not yet been received");
-            }
-
-            lock ( this.messageSync)
+            lock (this.messageSync)
             {
                 this.port.Write(new char[] { 't' }, 0, 1);
             }
@@ -188,13 +173,16 @@ namespace Arduino.Osci.Base.Logic
             {
                 Debug.WriteLine("Stop has been received");
                 this.buffer.Clear();
-                this.isRunning = false;
+                lock (this.messageSync)
+                {
+                    this.isRunning = false;
+                }
 
                 this.stopMessageReceived.Set();
 
                 return new StopSequence();
             }
-    
+
             // Check for error
             if (length == 4 &&
                 this.buffer[0] == 0xFF &&
@@ -279,8 +267,16 @@ namespace Arduino.Osci.Base.Logic
         /// </summary>
         public void WaitForStop()
         {
-            while (this.isRunning)
+            while (true)
             {
+                lock (this.messageSync)
+                {
+                    if (this.isRunning)
+                    {
+                        return;
+                    }
+                }
+
                 this.stopMessageReceived.WaitOne(500);
             }
         }
