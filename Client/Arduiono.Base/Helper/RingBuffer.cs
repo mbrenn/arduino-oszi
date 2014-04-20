@@ -65,10 +65,31 @@ namespace Arduino.Generic
             get
             {
                 // validate the index
-                if (index < 0 || index >= Count)
+                if (index < 0 || index >= LongCount)
                     throw new IndexOutOfRangeException();
                 // calculate the relative position within the rolling base array
-                int index2 = (position - Count + index) % Capacity;
+                var index2 = (position - LongCount + index) % Capacity;
+                return this.buffer[index2];
+            }
+            set { Insert(index, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets an item for a specified position within the ring buffer.
+        /// </summary>
+        /// <param name="index">The position to get or set an item.</param>
+        /// <returns>The fond item at the specified position within the ring buffer.
+        /// </returns>
+        /// <exception cref="IndexOutOfRangeException"></exception>
+        public T this[long index]
+        {
+            get
+            {
+                // validate the index
+                if (index < 0 || index >= LongCount)
+                    throw new IndexOutOfRangeException();
+                // calculate the relative position within the rolling base array
+                var index2 = (position - LongCount + index) % Capacity;
                 return this.buffer[index2];
             }
             set { Insert(index, value); }
@@ -78,10 +99,13 @@ namespace Arduino.Generic
         /// Gets the maximal count of items within the ring buffer.
         /// </summary>
         public int Capacity { get; private set; }
+
+        public int Count { get { return (int)this.LongCount; } }
+
         /// <summary>
         /// Get the current count of items within the ring buffer.
         /// </summary>
-        public int Count { get; private set; }
+        public long LongCount { get; private set; }
 
         /// <summary>
         /// Adds a new item to the buffer.
@@ -93,9 +117,9 @@ namespace Arduino.Generic
             // buffer and increase the position
             this.buffer[position++ % Capacity] = item;
             // increase the count if capacity is not yet reached
-            if (Count < Capacity)
+            if (LongCount < Capacity)
             {
-                Count++;
+                LongCount++;
             }
 
             // buffer changed; next version
@@ -108,13 +132,13 @@ namespace Arduino.Generic
         /// </summary>
         public void Clear()
         {
-            for (int i = 0; i < Count; i++)
+            for (int i = 0; i < LongCount; i++)
             {
                 this.buffer[i] = default(T);
             }
 
             position = 0;
-            Count = 0;
+            LongCount = 0;
             this.version++;
         }
 
@@ -141,9 +165,9 @@ namespace Arduino.Generic
         /// array to start copying.</param>
         public void CopyTo(T[] array, int arrayIndex)
         {
-            for (int i = 0; i < Count; i++)
+            for (var i = 0L; i < LongCount; i++)
             {
-                array[i + arrayIndex] = this.buffer[(position - Count + i) % Capacity];
+                array[i + arrayIndex] = this.buffer[(position - LongCount + i) % Capacity];
             }
         }
 
@@ -156,7 +180,7 @@ namespace Arduino.Generic
         {
             long version = this.version;
 
-            for (int i = 0; i < Count; i++)
+            for (var i = 0L; i < LongCount; i++)
             {
                 if (this.version != version)
                     throw new InvalidOperationException("Collection changed");
@@ -174,16 +198,16 @@ namespace Arduino.Generic
         public int IndexOf(T item)
         {
             // loop over the current count of items
-            for (int i = 0; i < Count; i++)
+            for (var i = 0L; i < LongCount; i++)
             {
                 // get the item at the relative position within the internal array
-                T item2 = this.buffer[(position - Count + i) % Capacity];
+                T item2 = this.buffer[(position - LongCount + i) % Capacity];
                 // if both items are null, return true
                 if (null == item && null == item2)
-                    return i;
+                    return (int)i;
                 // if equal return the position
                 if (item != null && item.Equals(item2))
-                    return i;
+                    return (int)i;
             }
             // nothing found
             return -1;
@@ -208,36 +232,41 @@ namespace Arduino.Generic
         /// </remarks>
         public void Insert(int index, T item)
         {
+            this.Insert((long) index, item);
+        }
+
+        public void Insert(long index, T item)
+        {
             // validate index
-            if (index < 0 || index > Count)
+            if (index < 0 || index > LongCount)
             {
                 throw new IndexOutOfRangeException();
             }
 
             // add if index equals to count
-            if (index == Count)
+            if (index == LongCount)
             {
                 Add(item);
                 return;
             }
 
             // get the maximal count of items to be moved
-            int count = Math.Min(Count, Capacity - 1) - index;
+            var count = Math.Min(LongCount, Capacity - 1) - index;
             // get the relative position of the new item within the buffer
-            int index2 = (position - Count + index) % Capacity;
+            var index2 = (position - LongCount + index) % Capacity;
             // move all items below the specified position
-            for (int i = index2 + count; i > index2; i--)
+            for (var i = index2 + count; i > index2; i--)
             {
-                int to = i % Capacity;
-                int from = (i - 1) % Capacity;
+                var to = i % Capacity;
+                var from = (i - 1) % Capacity;
                 this.buffer[to] = this.buffer[from];
             }
             // set the new item
             this.buffer[index2] = item;
             // adjust storage information
-            if (Count < Capacity)
+            if (LongCount < Capacity)
             {
-                Count++;
+                LongCount++;
                 position++;
             }
 
@@ -287,17 +316,22 @@ namespace Arduino.Generic
         /// </remarks>
         public void RemoveAt(int index)
         {
+            this.RemoveAt((long)index);
+        }
+
+        public void RemoveAt(long index)
+        {
             // validate the index
-            if (index < 0 || index >= Count)
+            if (index < 0 || index >= LongCount)
                 throw new IndexOutOfRangeException();
             // move all items above the specified position one step
             // closer to zeri
-            for (int i = index; i < Count - 1; i++)
+            for (var i = index; i < LongCount - 1; i++)
             {
                 // get the next relative target position of the item
-                int to = (position - Count + i) % Capacity;
+                var to = (position - LongCount + i) % Capacity;
                 // get the next relative source position of the item
-                int from = (position - Count + i + 1) % Capacity;
+                var from = (position - LongCount + i + 1) % Capacity;
                 // move the item
                 this.buffer[to] = this.buffer[from];
             }
@@ -309,7 +343,7 @@ namespace Arduino.Generic
 
             // adjust storage information
             position--;
-            Count--;
+            LongCount--;
 
             // buffer changed; next version
             this.version++;
@@ -338,7 +372,7 @@ namespace Arduino.Generic
         {
             get
             {
-                return Math.Min(this.Count, this.Capacity);
+                return (int) Math.Min(this.LongCount, this.Capacity);
             }
         }
     }
