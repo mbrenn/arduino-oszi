@@ -34,6 +34,8 @@ namespace Arduino.Osci.Base.Logic
     {
         private int channelCount = 0;
 
+        private const int BufferSize = 10000;
+
         /// <summary>
         /// Gets the value whether the data acquisition is currently running.
         /// If this value gets changed
@@ -93,7 +95,7 @@ namespace Arduino.Osci.Base.Logic
         /// <summary>
         /// Stores the samples for a certain amount of time
         /// </summary>
-        private RingBuffer<Sample> buffer = new RingBuffer<Sample>(10000);
+        private RingBuffer<Sample> buffer = new RingBuffer<Sample>(BufferSize);
 
         /// <summary>
         /// Gets the ring buffer. Not Threadsafe
@@ -109,15 +111,32 @@ namespace Arduino.Osci.Base.Logic
             this.Connection = connection;
         }
 
+        private Sample[] temporaryBuffer = new Sample[BufferSize];
+
         /// <summary>
         /// Returns the buffer as threadsafe instance
         /// </summary>
         /// <returns>Gets the buffer of the list</returns>
-        public List<Sample> GetBuffer()
+        public Sample[] GetBuffer()
         {
+            var stopWatch = new System.Diagnostics.Stopwatch();
+            stopWatch.Start();
             lock (this)
             {
-                return this.buffer.ToList();
+                var totalRingBufferSize = this.Buffer.Count;
+
+                var starting = Math.Max(0, this.Buffer.Count - BufferSize + 1);
+                var m = 0;
+                for (var n = starting; n < totalRingBufferSize; n++)
+                {
+                    this.temporaryBuffer[m] = this.buffer[n];
+                    m++;
+                }
+
+                stopWatch.Stop();
+                System.Diagnostics.Debug.WriteLine("Duration: " + stopWatch.Elapsed.TotalMilliseconds.ToString() + " ms");
+
+                return this.temporaryBuffer;
             }
         }
 

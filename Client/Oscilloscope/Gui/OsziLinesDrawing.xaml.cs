@@ -81,7 +81,11 @@ namespace Oszillator.Gui
 
         protected override void OnRender(DrawingContext drawingContext)
         {
+            var stopWatch = new System.Diagnostics.Stopwatch();
+            stopWatch.Start();
+
             var drawings = 0;
+            var skipped = 0;
             var width = this.ActualWidth;
             var height = this.ActualHeight;
 
@@ -112,15 +116,24 @@ namespace Oszillator.Gui
             // Now paint
             var startPoint = new Point();
             var endPoint = new Point();
+            var dataBuffer = this.DataAcquisition.GetBuffer();
+
             for (var channel = 0; channel < this.DataAcquisition.ChannelCount; channel++)
             {
                 var lastX = Double.MinValue;
                 var lastY = Double.MinValue;
 
-                foreach (var sample in this.DataAcquisition.GetBuffer())
+                foreach (var sample in dataBuffer)
                 {
+                    if (sample == null)
+                    {
+                        skipped++;
+                        continue;
+                    }
+
                     if (sample.SampleTime < startingSamples)
                     {
+                        skipped++;
                         // In past
                         continue;
                     }
@@ -143,11 +156,16 @@ namespace Oszillator.Gui
                         endPoint.X = x;
                         endPoint.Y = y;
 
-                        if (startPoint.X != endPoint.X)
+                        if (Math.Floor(startPoint.X) != Math.Floor(endPoint.X))
                         {
                             drawingContext.DrawLine(this.pens[channel], startPoint, endPoint);
+
                             drawings++;
                             lastY = y;
+                        }
+                        else
+                        {
+                            skipped++;
                         }
                     }
 
@@ -156,6 +174,9 @@ namespace Oszillator.Gui
             }
 
             this.LinesPerDrawing = drawings;
+
+            stopWatch.Stop();
+            System.Diagnostics.Debug.WriteLine("Duration: " + stopWatch.Elapsed.TotalMilliseconds.ToString() + "ms, Width: " + width.ToString() + ", Drawings: " + drawings.ToString() + ", Skipped: " + skipped.ToString());
         }
 
         public void Start()
