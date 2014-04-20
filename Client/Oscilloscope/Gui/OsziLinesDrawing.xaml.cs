@@ -151,10 +151,10 @@ namespace Oszillator.Gui
 
                     if (lastX != Double.MinValue && lastX <= x)
                     {
-                        startPoint.X = lastX;
-                        startPoint.Y = lastY;
-                        endPoint.X = x;
-                        endPoint.Y = y;
+                        startPoint.X = Math.Floor(lastX);
+                        startPoint.Y = Math.Floor(lastY);
+                        endPoint.X = Math.Floor(x);
+                        endPoint.Y = Math.Floor(y);
 
                         if (Math.Floor(startPoint.X) != Math.Floor(endPoint.X))
                         {
@@ -176,7 +176,7 @@ namespace Oszillator.Gui
             this.LinesPerDrawing = drawings;
 
             stopWatch.Stop();
-            System.Diagnostics.Debug.WriteLine("Duration: " + stopWatch.Elapsed.TotalMilliseconds.ToString() + "ms, Width: " + width.ToString() + ", Drawings: " + drawings.ToString() + ", Skipped: " + skipped.ToString());
+            //System.Diagnostics.Debug.WriteLine("Duration: " + stopWatch.Elapsed.TotalMilliseconds.ToString() + "ms, Width: " + width.ToString() + ", Drawings: " + drawings.ToString() + ", Skipped: " + skipped.ToString());
         }
 
         public void Start()

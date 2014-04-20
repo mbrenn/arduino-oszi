@@ -134,7 +134,7 @@ namespace Arduino.Osci.Base.Logic
                 }
 
                 stopWatch.Stop();
-                System.Diagnostics.Debug.WriteLine("Duration: " + stopWatch.Elapsed.TotalMilliseconds.ToString() + " ms");
+                //System.Diagnostics.Debug.WriteLine("Duration: " + stopWatch.Elapsed.TotalMilliseconds.ToString() + " ms");
 
                 return this.temporaryBuffer;
             }
